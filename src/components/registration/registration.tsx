@@ -1,5 +1,6 @@
 import User from "../../data-models/user";
 import React, { ReactNode } from "react";
+import './style.css'
 
 interface State {
   inputsValidation: {
@@ -111,7 +112,7 @@ export default class Registration extends React.Component<any, State> {
     return validated
   }
 
-  onSubmit = (event: any): void => {
+  onSubmit = async (event: any): Promise<void> => {
     const name = this.inputsRef["name"].value;
     const lastname = this.inputsRef["lastname"].value;
     const email = this.inputsRef["email"].value;
@@ -126,19 +127,18 @@ export default class Registration extends React.Component<any, State> {
     
     if (ok) {
         const user = new User(name, lastname, email, password);
-        fetch('http://localhost:2000/user/register', {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(user)
-        })
-        .then(response => response.json())
-        .then(data => {
-          alert(data);
-        })
-        .catch(error => alert(error))
+
+        try {
+          const data = await fetch('http://localhost:2000/user/register', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(user)
+          })
+          alert(await data.json())
+        } catch(err) {
+          alert(err)
+        }
     }
 
     event.preventDefault();
@@ -209,6 +209,15 @@ export default class Registration extends React.Component<any, State> {
         <input
           type="submit"
           className="btn btn-primary"
+          value="Sign Up"
+          id="submit"
+        />
+
+        <input
+          type="submit"
+          className="btn btn-secondary"
+          value="Cancel"
+          onClick={this.props.onCancel}
         />
       </form>
     );
