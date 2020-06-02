@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
+    "strictNullChecks": false,
     "outDir": "./dist/",
     "sourceMap": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "module": "esnext",
     "target": "es6",
     "jsx": "react",
@@ -21,7 +22,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "typeRoots": ["./typings", "node_modules/@types"]
+    "typeRoots": [
+      "./typings",
+      "node_modules/@types"
+    ],
+    "baseUrl": "./src"
   },
   "include": [
     "src"

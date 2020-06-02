@@ -1,19 +1,18 @@
-import { Register } from "models/user";
+import { Login } from "models/user";
 import React from "react";
 import server_info from 'config/server.json'
 import * as vld from 'validation/user'
 import './style.css';
 
 interface Props {
-  onError(error),
-  onSuccess(data),
+  onError(error)
+  onSuccess(data)
   onCancel()
+  onForgotPassword()
 }
 
-export default class RegisterDialog extends React.Component<Props, any> {
+export default class LoginDialog extends React.Component<Props, any> {
   private inputsRef = {
-    name: undefined,
-    lastname: undefined,
     email: undefined,
     password: undefined
   }
@@ -23,8 +22,6 @@ export default class RegisterDialog extends React.Component<Props, any> {
 
     this.state = {
       inputsValidation: {
-        name: true,
-        lastname: true,
         email: true,
         password: true,
       },
@@ -36,20 +33,10 @@ export default class RegisterDialog extends React.Component<Props, any> {
   private onSubmit = async (event): Promise<void> => {
     event.preventDefault();
     
-    const name = this.inputsRef.name.value;
-    const lastname = this.inputsRef.lastname.value;
     const email = this.inputsRef.email.value;
     const password = this.inputsRef.password.value;
 
     const validationFlags = {
-      name: {
-        flag: vld.validateName(name),
-        ref: this.inputsRef.name
-      },
-      lastName: {
-        flag: vld.validateLastName(lastname),
-        ref: this.inputsRef.lastname
-      },
       email: {
         flag: vld.validateEmail(email),
         ref: this.inputsRef.email
@@ -69,7 +56,7 @@ export default class RegisterDialog extends React.Component<Props, any> {
     const validated = Object.values(validationFlags).every(v => v.flag)
 
     if (validated) {
-      const user = new Register(name, lastname, email, password);
+      const user = new Login(email, password);
       await this.sendData(user)
     }
   }
@@ -84,10 +71,11 @@ export default class RegisterDialog extends React.Component<Props, any> {
     }
   }
 
-  private sendData = async (payload: Register) => {
+  private sendData = async (payload: Login) => {
     try {
-      const data = await $.ajax(`http://${server_info.ip}:${server_info.port}/user/register`, {
-        method: 'POST',
+      const data = await $.ajax(`http://${server_info.ip}:${server_info.port}/user/login`, {
+        method: 'PUT',
+        crossDomain: true,
         headers: { 'Content-Type': 'application/json' },
         data: JSON.stringify(payload)
       })
@@ -107,34 +95,6 @@ export default class RegisterDialog extends React.Component<Props, any> {
       this.state.show && 
         (<div className="container">
         <form id="register-form" onSubmit={this.onSubmit}>
-          <div className="form-group">
-            <label className="form-check-label">Name</label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              className="form-control"
-              ref={r => this.inputsRef["name"] = r}
-            />
-            {!this.state.inputsValidation["name"] && (
-              <div className="invalid-feedback">Wrong name</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label className="form-check-label">Lastname</label>
-            <input
-              type="text"
-              name="lastname"
-              placeholder="Lastname"
-              className="form-control"
-              ref={r => this.inputsRef["lastname"] = r}
-            />
-            {!this.state.inputsValidation["lastname"] && (
-              <div className="invalid-feedback">Wrong lastname</div>
-            )}
-          </div>
-
           <div className="form-group">
             <label className="form-check-label">E-mail</label>
             <input
@@ -169,8 +129,15 @@ export default class RegisterDialog extends React.Component<Props, any> {
           <input
             type="submit"
             className="btn btn-primary"
-            value="Sign Up"
+            value="Sign In"
             id="submit"
+          />
+
+          <input
+            type="button"
+            className="btn btn-secondary"
+            value="Forgot password"
+            onClick={() => {this.close(); this.props.onForgotPassword()}}
           />
 
           <input

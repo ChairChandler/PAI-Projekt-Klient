@@ -1,0 +1,27 @@
+form {
+    position: fixed;
+    z-index: 1;
+    width: 25%;
+    margin: 0 auto;
+    border: #ced4da solid 1px;
+    border-radius: 25px;
+    padding: 20px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    animation-name: fromTop;
+    animation-duration: 2s;
+    animation-fill-mode: forwards;
+  }
+  
+  #submit {
+    margin-right: 10px;
+  }
+  
+  @keyframes fromTop {
+    0% {top: 0%; display: none;}
+    100% {top: 20%; display: block;}
+  }
+  
+  .container {
+    display: flex;
+    justify-content: center;
+  }

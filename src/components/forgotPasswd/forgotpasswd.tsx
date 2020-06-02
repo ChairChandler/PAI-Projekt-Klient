@@ -1,21 +1,18 @@
-import { Register } from "models/user";
+import { ForgotPasswd } from "models/user";
 import React from "react";
 import server_info from 'config/server.json'
 import * as vld from 'validation/user'
 import './style.css';
 
 interface Props {
-  onError(error),
-  onSuccess(data),
+  onError(error)
+  onSuccess(data)
   onCancel()
 }
 
-export default class RegisterDialog extends React.Component<Props, any> {
+export default class LoginDialog extends React.Component<Props, any> {
   private inputsRef = {
-    name: undefined,
-    lastname: undefined,
-    email: undefined,
-    password: undefined
+    email: undefined
   }
 
   constructor(props: Props) {
@@ -23,10 +20,7 @@ export default class RegisterDialog extends React.Component<Props, any> {
 
     this.state = {
       inputsValidation: {
-        name: true,
-        lastname: true,
-        email: true,
-        password: true,
+        email: true
       },
       first: true,
       show: true
@@ -36,27 +30,12 @@ export default class RegisterDialog extends React.Component<Props, any> {
   private onSubmit = async (event): Promise<void> => {
     event.preventDefault();
     
-    const name = this.inputsRef.name.value;
-    const lastname = this.inputsRef.lastname.value;
     const email = this.inputsRef.email.value;
-    const password = this.inputsRef.password.value;
 
     const validationFlags = {
-      name: {
-        flag: vld.validateName(name),
-        ref: this.inputsRef.name
-      },
-      lastName: {
-        flag: vld.validateLastName(lastname),
-        ref: this.inputsRef.lastname
-      },
       email: {
         flag: vld.validateEmail(email),
         ref: this.inputsRef.email
-      },
-      password: {
-        flag: vld.validatePassword(password),
-        ref: this.inputsRef.password
       }
     };
     
@@ -69,7 +48,7 @@ export default class RegisterDialog extends React.Component<Props, any> {
     const validated = Object.values(validationFlags).every(v => v.flag)
 
     if (validated) {
-      const user = new Register(name, lastname, email, password);
+      const user = new ForgotPasswd(email);
       await this.sendData(user)
     }
   }
@@ -84,10 +63,11 @@ export default class RegisterDialog extends React.Component<Props, any> {
     }
   }
 
-  private sendData = async (payload: Register) => {
+  private sendData = async (payload: ForgotPasswd) => {
     try {
-      const data = await $.ajax(`http://${server_info.ip}:${server_info.port}/user/register`, {
-        method: 'POST',
+      const data = await $.ajax(`http://${server_info.ip}:${server_info.port}/user/login`, {
+        method: 'GET',
+        crossDomain: true,
         headers: { 'Content-Type': 'application/json' },
         data: JSON.stringify(payload)
       })
@@ -108,34 +88,6 @@ export default class RegisterDialog extends React.Component<Props, any> {
         (<div className="container">
         <form id="register-form" onSubmit={this.onSubmit}>
           <div className="form-group">
-            <label className="form-check-label">Name</label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              className="form-control"
-              ref={r => this.inputsRef["name"] = r}
-            />
-            {!this.state.inputsValidation["name"] && (
-              <div className="invalid-feedback">Wrong name</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label className="form-check-label">Lastname</label>
-            <input
-              type="text"
-              name="lastname"
-              placeholder="Lastname"
-              className="form-control"
-              ref={r => this.inputsRef["lastname"] = r}
-            />
-            {!this.state.inputsValidation["lastname"] && (
-              <div className="invalid-feedback">Wrong lastname</div>
-            )}
-          </div>
-
-          <div className="form-group">
             <label className="form-check-label">E-mail</label>
             <input
               type="email"
@@ -149,27 +101,10 @@ export default class RegisterDialog extends React.Component<Props, any> {
             )}
           </div>
 
-          <div className="form-group">
-            <label className="form-check-label">Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              className="form-control"
-              ref={r => this.inputsRef["password"] = r}
-            />
-            {!this.state.inputsValidation["password"] && (
-              <div className="invalid-feedback">Wrong password</div>
-            )}
-            <small className="form-text text-muted">
-              Your password must be 8-16 characters long.
-          </small>
-          </div>
-
           <input
             type="submit"
             className="btn btn-primary"
-            value="Sign Up"
+            value="Remind password"
             id="submit"
           />
 
