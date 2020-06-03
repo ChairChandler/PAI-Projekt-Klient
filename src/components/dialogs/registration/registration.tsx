@@ -35,7 +35,7 @@ export default class RegisterDialog extends React.Component<Props, any> {
 
   private onSubmit = async (event): Promise<void> => {
     event.preventDefault();
-    
+
     const name = this.inputsRef.name.value;
     const lastname = this.inputsRef.lastname.value;
     const email = this.inputsRef.email.value;
@@ -59,7 +59,7 @@ export default class RegisterDialog extends React.Component<Props, any> {
         ref: this.inputsRef.password
       }
     };
-    
+
     const inVal = this.state.inputsValidation
     for (const input in validationFlags) {
       inVal[input] = validationFlags[input].flag
@@ -86,26 +86,23 @@ export default class RegisterDialog extends React.Component<Props, any> {
 
   private sendData = async (payload: Register) => {
     try {
-      const data = await $.ajax(`http://${server_info.ip}:${server_info.port}/user/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        data: JSON.stringify(payload)
+      const data = $.post(`http://${server_info.ip}:${server_info.port}/user/register`, payload, function() {
+        this.close()
+        this.props.onSuccess(data.responseJSON)
       })
-      this.close()
-      this.props.onSuccess(data.responseJSON)
     } catch (err) {
       this.props.onError(err)
     }
   }
 
   private close = () => {
-    this.setState({...this.state, show: false})
+    this.setState({ ...this.state, show: false })
   }
 
   render = () => {
     return (
-      this.state.show && 
-        (<div className="container">
+      this.state.show &&
+      (<div className="container">
         <form id="register-form" onSubmit={this.onSubmit}>
           <div className="form-group">
             <label className="form-check-label">Name</label>
@@ -166,19 +163,21 @@ export default class RegisterDialog extends React.Component<Props, any> {
           </small>
           </div>
 
-          <input
-            type="submit"
-            className="btn btn-primary"
-            value="Sign Up"
-            id="submit"
-          />
+          <div className="flex">
+            <input
+              type="submit"
+              className="btn btn-primary"
+              value="Sign Up"
+              id="submit"
+            />
 
-          <input
-            type="button"
-            className="btn btn-secondary"
-            value="Cancel"
-            onClick={() => {this.close(); this.props.onCancel()}}
-          />
+            <input
+              type="button"
+              className="btn btn-secondary"
+              value="Cancel"
+              onClick={() => { this.close(); this.props.onCancel() }}
+            />
+          </div>
         </form>
       </div>
       )

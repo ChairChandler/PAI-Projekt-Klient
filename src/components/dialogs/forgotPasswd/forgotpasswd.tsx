@@ -1,4 +1,4 @@
-import { Login } from "models/user";
+import { ForgotPasswd } from "models/user";
 import React from "react";
 import server_info from 'config/server.json'
 import * as vld from 'validation/user'
@@ -8,13 +8,11 @@ interface Props {
   onError(error)
   onSuccess(data)
   onCancel()
-  onForgotPassword()
 }
 
 export default class LoginDialog extends React.Component<Props, any> {
   private inputsRef = {
-    email: undefined,
-    password: undefined
+    email: undefined
   }
 
   constructor(props: Props) {
@@ -22,8 +20,7 @@ export default class LoginDialog extends React.Component<Props, any> {
 
     this.state = {
       inputsValidation: {
-        email: true,
-        password: true,
+        email: true
       },
       first: true,
       show: true
@@ -32,21 +29,16 @@ export default class LoginDialog extends React.Component<Props, any> {
 
   private onSubmit = async (event): Promise<void> => {
     event.preventDefault();
-    
+
     const email = this.inputsRef.email.value;
-    const password = this.inputsRef.password.value;
 
     const validationFlags = {
       email: {
         flag: vld.validateEmail(email),
         ref: this.inputsRef.email
-      },
-      password: {
-        flag: vld.validatePassword(password),
-        ref: this.inputsRef.password
       }
     };
-    
+
     const inVal = this.state.inputsValidation
     for (const input in validationFlags) {
       inVal[input] = validationFlags[input].flag
@@ -56,7 +48,7 @@ export default class LoginDialog extends React.Component<Props, any> {
     const validated = Object.values(validationFlags).every(v => v.flag)
 
     if (validated) {
-      const user = new Login(email, password);
+      const user = new ForgotPasswd(email);
       await this.sendData(user)
     }
   }
@@ -71,13 +63,13 @@ export default class LoginDialog extends React.Component<Props, any> {
     }
   }
 
-  private sendData = async (payload: Login) => {
+  private sendData = async (payload: ForgotPasswd) => {
     try {
       const data = await $.ajax(`http://${server_info.ip}:${server_info.port}/user/login`, {
-        method: 'PUT',
+        method: 'GET',
         crossDomain: true,
         headers: { 'Content-Type': 'application/json' },
-        data: JSON.stringify(payload)
+        data: $.param(payload)
       })
       this.close()
       this.props.onSuccess(data.responseJSON)
@@ -87,13 +79,13 @@ export default class LoginDialog extends React.Component<Props, any> {
   }
 
   private close = () => {
-    this.setState({...this.state, show: false})
+    this.setState({ ...this.state, show: false })
   }
 
   render = () => {
     return (
-      this.state.show && 
-        (<div className="container">
+      this.state.show &&
+      (<div className="container">
         <form id="register-form" onSubmit={this.onSubmit}>
           <div className="form-group">
             <label className="form-check-label">E-mail</label>
@@ -109,43 +101,21 @@ export default class LoginDialog extends React.Component<Props, any> {
             )}
           </div>
 
-          <div className="form-group">
-            <label className="form-check-label">Password</label>
+          <div className="flex">
             <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              className="form-control"
-              ref={r => this.inputsRef["password"] = r}
+              type="submit"
+              className="btn btn-primary"
+              value="Remind password"
+              id="submit"
             />
-            {!this.state.inputsValidation["password"] && (
-              <div className="invalid-feedback">Wrong password</div>
-            )}
-            <small className="form-text text-muted">
-              Your password must be 8-16 characters long.
-          </small>
+
+            <input
+              type="button"
+              className="btn btn-secondary"
+              value="Cancel"
+              onClick={() => { this.close(); this.props.onCancel() }}
+            />
           </div>
-
-          <input
-            type="submit"
-            className="btn btn-primary"
-            value="Sign In"
-            id="submit"
-          />
-
-          <input
-            type="button"
-            className="btn btn-secondary"
-            value="Forgot password"
-            onClick={() => {this.close(); this.props.onForgotPassword()}}
-          />
-
-          <input
-            type="button"
-            className="btn btn-secondary"
-            value="Cancel"
-            onClick={() => {this.close(); this.props.onCancel()}}
-          />
         </form>
       </div>
       )

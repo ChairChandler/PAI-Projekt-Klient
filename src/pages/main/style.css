@@ -1,0 +1,21 @@
+.logo-container {
+    overflow: hidden;
+    height: 25vh;
+}
+
+.logo {
+    background-image: url('https://storage.needpix.com/rsynced_images/game-3723087_1280.jpg');
+    background-repeat: no-repeat;
+    background-size: 100%;
+    height: 20vh;
+    box-shadow: -3px -1px 38px 21px rgba(184,184,184,0.7);
+}
+
+.button-nav {
+    display: flex;
+    background-color: #222;
+}
+
+.button-nav > * {
+    margin: 10px;
+}

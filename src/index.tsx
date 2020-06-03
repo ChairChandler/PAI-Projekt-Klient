@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import Register from './components/registration/registration';
+import MainPage from 'pages/main/page';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Register />
+    <MainPage />
   </React.StrictMode>,
   document.getElementById('root')
 );

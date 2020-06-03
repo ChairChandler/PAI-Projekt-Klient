@@ -10,9 +10,16 @@ form {
     animation-name: fromTop;
     animation-duration: 2s;
     animation-fill-mode: forwards;
+    background-color: white;
   }
   
-  #submit {
+  .flex {
+    display: flex;
+  }
+  
+  .flex > input {
+    white-space: normal;
+    word-wrap: break-word;
     margin-right: 10px;
   }
   

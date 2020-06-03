@@ -1,4 +1,4 @@
-import { ForgotPasswd } from "models/user";
+import { Login } from "models/user";
 import React from "react";
 import server_info from 'config/server.json'
 import * as vld from 'validation/user'
@@ -8,11 +8,13 @@ interface Props {
   onError(error)
   onSuccess(data)
   onCancel()
+  onForgotPassword()
 }
 
 export default class LoginDialog extends React.Component<Props, any> {
   private inputsRef = {
-    email: undefined
+    email: undefined,
+    password: undefined
   }
 
   constructor(props: Props) {
@@ -20,7 +22,8 @@ export default class LoginDialog extends React.Component<Props, any> {
 
     this.state = {
       inputsValidation: {
-        email: true
+        email: true,
+        password: true,
       },
       first: true,
       show: true
@@ -31,11 +34,16 @@ export default class LoginDialog extends React.Component<Props, any> {
     event.preventDefault();
     
     const email = this.inputsRef.email.value;
+    const password = this.inputsRef.password.value;
 
     const validationFlags = {
       email: {
         flag: vld.validateEmail(email),
         ref: this.inputsRef.email
+      },
+      password: {
+        flag: vld.validatePassword(password),
+        ref: this.inputsRef.password
       }
     };
     
@@ -48,7 +56,7 @@ export default class LoginDialog extends React.Component<Props, any> {
     const validated = Object.values(validationFlags).every(v => v.flag)
 
     if (validated) {
-      const user = new ForgotPasswd(email);
+      const user = new Login(email, password);
       await this.sendData(user)
     }
   }
@@ -63,10 +71,10 @@ export default class LoginDialog extends React.Component<Props, any> {
     }
   }
 
-  private sendData = async (payload: ForgotPasswd) => {
+  private sendData = async (payload: Login) => {
     try {
       const data = await $.ajax(`http://${server_info.ip}:${server_info.port}/user/login`, {
-        method: 'GET',
+        method: 'PUT',
         crossDomain: true,
         headers: { 'Content-Type': 'application/json' },
         data: JSON.stringify(payload)
@@ -101,19 +109,45 @@ export default class LoginDialog extends React.Component<Props, any> {
             )}
           </div>
 
-          <input
-            type="submit"
-            className="btn btn-primary"
-            value="Remind password"
-            id="submit"
-          />
+          <div className="form-group">
+            <label className="form-check-label">Password</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className="form-control"
+              ref={r => this.inputsRef["password"] = r}
+            />
+            {!this.state.inputsValidation["password"] && (
+              <div className="invalid-feedback">Wrong password</div>
+            )}
+            <small className="form-text text-muted">
+              Your password must be 8-16 characters long.
+          </small>
+          </div>
 
-          <input
-            type="button"
-            className="btn btn-secondary"
-            value="Cancel"
-            onClick={() => {this.close(); this.props.onCancel()}}
-          />
+          <div className="flex">
+            <input
+              type="submit"
+              className="btn btn-primary"
+              value="Sign In"
+              id="submit"
+            />
+
+            <input
+              type="button"
+              className="btn btn-secondary"
+              value="Forgot password"
+              onClick={() => {this.close(); this.props.onForgotPassword()}}
+            />
+
+            <input
+              type="button"
+              className="btn btn-secondary"
+              value="Cancel"
+              onClick={() => {this.close(); this.props.onCancel()}}
+            />
+          </div>
         </form>
       </div>
       )
