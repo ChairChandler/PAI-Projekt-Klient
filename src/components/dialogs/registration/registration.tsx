@@ -5,12 +5,23 @@ import * as vld from 'validation/user'
 import './style.css';
 
 interface Props {
-  onError(error),
-  onSuccess(data),
-  onCancel()
+  onError: (error) => void
+  onSuccess: (data) => void
+  onCancel: () => void
 }
 
-export default class RegisterDialog extends React.Component<Props, any> {
+interface State {
+  inputsValidation: {
+    name: boolean
+    lastname: boolean
+    email: boolean
+    password: boolean
+  }
+  first: boolean
+  show: boolean
+}
+
+export default class RegisterDialog extends React.Component<Props, State> {
   private inputsRef = {
     name: undefined,
     lastname: undefined,
@@ -84,15 +95,11 @@ export default class RegisterDialog extends React.Component<Props, any> {
     }
   }
 
-  private sendData = async (payload: Register) => {
-    try {
-      const data = $.post(`http://${server_info.ip}:${server_info.port}/user/register`, payload, function() {
-        this.close()
-        this.props.onSuccess(data.responseJSON)
-      })
-    } catch (err) {
-      this.props.onError(err)
-    }
+  private sendData = (payload: Register) => {
+    $.post(`http://${server_info.ip}:${server_info.port}/user/register`, payload, data => {
+      this.close()
+      this.props.onSuccess(data)
+    }).fail(err => this.props.onError(err.responseText))
   }
 
   private close = () => {

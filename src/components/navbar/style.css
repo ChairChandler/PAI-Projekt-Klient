@@ -1,0 +1,8 @@
+#nav {
+    display: flex;
+    background-color: #222;
+}
+
+#nav > * {
+    margin: 10px;
+}

@@ -5,13 +5,22 @@ import * as vld from 'validation/user'
 import './style.css';
 
 interface Props {
-  onError(error)
-  onSuccess(data)
-  onCancel()
-  onForgotPassword()
+  onError: (error) => void
+  onSuccess: (email: string) => void
+  onCancel: () => void
+  onForgotPassword: () => void
 }
 
-export default class LoginDialog extends React.Component<Props, any> {
+interface State {
+  inputsValidation: {
+    email: boolean
+    password: boolean
+  },
+  first: boolean
+  show: boolean
+}
+
+export default class LoginDialog extends React.Component<Props, State> {
   private inputsRef = {
     email: undefined,
     password: undefined
@@ -32,7 +41,7 @@ export default class LoginDialog extends React.Component<Props, any> {
 
   private onSubmit = async (event): Promise<void> => {
     event.preventDefault();
-    
+
     const email = this.inputsRef.email.value;
     const password = this.inputsRef.password.value;
 
@@ -46,7 +55,7 @@ export default class LoginDialog extends React.Component<Props, any> {
         ref: this.inputsRef.password
       }
     };
-    
+
     const inVal = this.state.inputsValidation
     for (const input in validationFlags) {
       inVal[input] = validationFlags[input].flag
@@ -73,27 +82,31 @@ export default class LoginDialog extends React.Component<Props, any> {
 
   private sendData = async (payload: Login) => {
     try {
-      const data = await $.ajax(`http://${server_info.ip}:${server_info.port}/user/login`, {
+      const data = await fetch(`http://${server_info.ip}:${server_info.port}/user/login`, {
         method: 'PUT',
-        crossDomain: true,
         headers: { 'Content-Type': 'application/json' },
-        data: JSON.stringify(payload)
+        body: JSON.stringify(payload)
       })
+      
+      if(!data.ok) {
+        throw Error(await data.text())
+      }
+
       this.close()
-      this.props.onSuccess(data.responseJSON)
+      this.props.onSuccess(payload.email)
     } catch (err) {
       this.props.onError(err)
     }
   }
 
   private close = () => {
-    this.setState({...this.state, show: false})
+    this.setState({ ...this.state, show: false })
   }
 
   render = () => {
     return (
-      this.state.show && 
-        (<div className="container">
+      this.state.show &&
+      (<div className="container">
         <form id="register-form" onSubmit={this.onSubmit}>
           <div className="form-group">
             <label className="form-check-label">E-mail</label>
@@ -138,14 +151,14 @@ export default class LoginDialog extends React.Component<Props, any> {
               type="button"
               className="btn btn-secondary"
               value="Forgot password"
-              onClick={() => {this.close(); this.props.onForgotPassword()}}
+              onClick={() => { this.close(); this.props.onForgotPassword() }}
             />
 
             <input
               type="button"
               className="btn btn-secondary"
               value="Cancel"
-              onClick={() => {this.close(); this.props.onCancel()}}
+              onClick={() => { this.close(); this.props.onCancel() }}
             />
           </div>
         </form>

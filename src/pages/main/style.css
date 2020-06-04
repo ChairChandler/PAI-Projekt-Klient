@@ -10,12 +10,3 @@
     height: 20vh;
     box-shadow: -3px -1px 38px 21px rgba(184,184,184,0.7);
 }
-
-.button-nav {
-    display: flex;
-    background-color: #222;
-}
-
-.button-nav > * {
-    margin: 10px;
-}

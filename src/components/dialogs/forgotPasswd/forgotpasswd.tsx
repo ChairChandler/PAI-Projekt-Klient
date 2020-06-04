@@ -5,12 +5,20 @@ import * as vld from 'validation/user'
 import './style.css';
 
 interface Props {
-  onError(error)
-  onSuccess(data)
-  onCancel()
+  onError: (error) => void
+  onSuccess: (data) => void
+  onCancel: () => void
 }
 
-export default class LoginDialog extends React.Component<Props, any> {
+interface State {
+  inputsValidation: {
+    email: boolean
+  },
+  first: boolean
+  show: boolean
+}
+
+export default class LoginDialog extends React.Component<Props, State> {
   private inputsRef = {
     email: undefined
   }
@@ -63,19 +71,11 @@ export default class LoginDialog extends React.Component<Props, any> {
     }
   }
 
-  private sendData = async (payload: ForgotPasswd) => {
-    try {
-      const data = await $.ajax(`http://${server_info.ip}:${server_info.port}/user/login`, {
-        method: 'GET',
-        crossDomain: true,
-        headers: { 'Content-Type': 'application/json' },
-        data: $.param(payload)
-      })
+  private sendData = (payload: ForgotPasswd) => {
+    $.get(`http://${server_info.ip}:${server_info.port}/user/login`, payload, data => {
       this.close()
-      this.props.onSuccess(data.responseJSON)
-    } catch (err) {
-      this.props.onError(err)
-    }
+      this.props.onSuccess(data)
+    }).fail(err => this.props.onError(err.responseText))
   }
 
   private close = () => {
