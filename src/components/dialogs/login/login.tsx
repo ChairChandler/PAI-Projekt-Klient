@@ -2,11 +2,12 @@ import { Login } from "models/user";
 import React from "react";
 import server_info from 'config/server.json'
 import * as vld from 'validation/user'
+import Cookies from 'js-cookie'
 import './style.css';
 
 interface Props {
   onError: (error) => void
-  onSuccess: (email: string) => void
+  onSuccess: (email: string, tokenMaxAge: number) => void
   onCancel: () => void
   onForgotPassword: () => void
 }
@@ -83,7 +84,8 @@ export default class LoginDialog extends React.Component<Props, State> {
   private sendData = async (payload: Login) => {
     try {
       const data = await fetch(`http://${server_info.ip}:${server_info.port}/user/login`, {
-        method: 'PUT',
+        method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
@@ -93,7 +95,7 @@ export default class LoginDialog extends React.Component<Props, State> {
       }
 
       this.close()
-      this.props.onSuccess(payload.email)
+      this.props.onSuccess(payload.email, Number.parseInt(Cookies.get('token-expiration-date')))
     } catch (err) {
       this.props.onError(err)
     }

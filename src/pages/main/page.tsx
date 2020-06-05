@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from 'components/navbar/navbar'
+import Navbar from 'pages/main/navbar/pageNavbar'
 import './style.css';
 
 interface State {
@@ -15,12 +15,15 @@ export default class MainPage extends React.Component<{}, State> {
     }
   }
 
-  private onLogin = () => {
-    this.setState({logged: true});
+  private onLogin = (email: string, tokenMaxAge: number) => {
+    setTimeout(() => {
+      this.setState({ logged: false });
+    }, tokenMaxAge);
+    this.setState({ logged: true });
   }
 
-  private onLogout = () => {
-    this.setState({logged: true});
+  private onLogout = async () => {
+    this.setState({ logged: false });
   }
 
   render = () => {
