@@ -1,5 +1,7 @@
 import React from "react";
-import Navbar from 'pages/main/navbar/pageNavbar'
+import Navbar from './navbar/pageNavbar'
+import UpcomingTournamentsTable from './upcomingTournaments/upcomingTournaments'
+import Logo from './logo/logo'
 import './style.css';
 
 interface State {
@@ -22,21 +24,25 @@ export default class MainPage extends React.Component<{}, State> {
     this.setState({ logged: true });
   }
 
-  private onLogout = async () => {
+  private onLogout = () => {
     this.setState({ logged: false });
   }
 
   render = () => {
     return (
       <div>
-        <Navbar
-          onLogin={this.onLogin}
-          onLogout={this.onLogout}>
-        </Navbar>
+        <nav>
+          <Navbar
+            onLogin={this.onLogin}
+            onLogout={this.onLogout}>
+          </Navbar>
+        </nav>
 
-        <div className='logo-container'>
-          <div className="logo"></div>
-        </div>
+        <Logo/>
+
+        <section>
+          <UpcomingTournamentsTable onTournamentClick={id => { alert(id)}}/>
+        </section>
       </div>
     )
   }

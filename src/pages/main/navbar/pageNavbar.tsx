@@ -28,6 +28,17 @@ export default class PageNavbar extends React.Component<Props, State> {
         }
     }
 
+    componentDidMount = () => {
+        function removeHash() {
+            window.history.pushState('', document.title, window.location.pathname + window.location.search);
+        }
+
+        if (window.location.hash === '#login') {
+            removeHash()
+            this.openDialog('login')
+        }
+    }
+
     private onLogoutButtonClicked = async () => {
         try {
             const data = await fetch(`http://${server_info.ip}:${server_info.port}/user/login`, {
@@ -52,7 +63,7 @@ export default class PageNavbar extends React.Component<Props, State> {
         this.props.onLogin(email, tokenMaxAge)
     }
 
-    private changeNavbar = (navbar: VisibleNavbar) => { 
+    private changeNavbar = (navbar: VisibleNavbar) => {
         const state = { ...this.state }
         state.visibleNavbar = navbar
         this.setState(state)
