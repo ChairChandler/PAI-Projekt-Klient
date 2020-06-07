@@ -3,10 +3,25 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import MainPage from 'pages/main/page';
 import * as serviceWorker from './serviceWorker';
+import { Switch, Route, Redirect, BrowserRouter } from 'react-router-dom';
+import DetailsPage from 'pages/details/page';
+import routing_info from 'config/routing.json'
+
 
 ReactDOM.render(
   <React.StrictMode>
-    <MainPage />
+    <BrowserRouter>
+      <Switch>
+        <Route exact path={routing_info.main}>
+          <MainPage detailsPagePath={routing_info.details}/>
+        </Route>
+
+        <Route exact path={routing_info.details} render={props => 
+          <DetailsPage {...props} mainPagePath={routing_info.main}/>}/>
+
+        <Redirect to={routing_info.main}></Redirect>
+      </Switch>
+    </BrowserRouter>
   </React.StrictMode>,
   document.getElementById('root')
 );
