@@ -16,7 +16,7 @@ export default class Navbar extends React.Component<any, State> {
             await $('#nav').children().animate({opacity: 0}, 200).promise()
             
             this.setState({ children: this.props.children })
-            this.forceUpdate() // setState in this lifecycle doesnt invokes render method
+            this.forceUpdate()
             await $('#nav').children().css({opacity: 0}).animate({opacity: 1}, 200).promise()
         }
     }

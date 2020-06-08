@@ -5,6 +5,7 @@ import './style.css';
 import { Redirect } from "react-router-dom";
 import InfoTable, { TournamentInfo } from './content/info/info'
 import server_info from 'config/server.json'
+import FadingAnimation from 'components/fading/fading'
 
 interface Props {
     mainPagePath: string
@@ -73,7 +74,7 @@ export default class DetailsPage extends React.Component<Props, State> {
         }
 
         return (
-            <div>
+            <FadingAnimation>
                 <nav>
                     <PageNavbar
                         onLogin={this.onLogin}
@@ -87,7 +88,7 @@ export default class DetailsPage extends React.Component<Props, State> {
                 <section>
                     <InfoTable data={this.state.data}/>
                 </section>
-            </div>
+            </FadingAnimation>
         )
     }
 }

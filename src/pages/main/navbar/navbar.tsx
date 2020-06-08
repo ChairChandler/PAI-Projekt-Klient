@@ -4,6 +4,7 @@ import RegisterDialog from 'components/dialogs/registration/registration';
 import ForgotPasswd from 'components/dialogs/forgotPasswd/forgotpasswd';
 import server_info from 'config/server.json';
 import Navbar from 'components/navbar/navbar';
+import isLogged from 'utils/is-logged';
 
 type VisibleDialog = 'login' | 'register' | 'forgotPassword'
 type VisibleNavbar = 'unlogged' | 'logged'
@@ -21,10 +22,10 @@ interface State {
 export default class PageNavbar extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
-
+        
         this.state = {
             showDialog: null,
-            visibleNavbar: 'unlogged'
+            visibleNavbar: isLogged() ? 'logged' : 'unlogged'
         }
     }
 

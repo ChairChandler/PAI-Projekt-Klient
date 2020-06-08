@@ -93,7 +93,7 @@ export default class InfoTable extends React.Component<Props, State> {
                 <div id="map"/>
             </div>
 
-            {this.state?.logos && <h1>Sponsors</h1>}
+            {this.state?.logos.length > 0 && <h1>Sponsors</h1>}
             <div id="tournament-container-logo" className="container-cols">
                 {
                     this.state?.logos.map(({ id, data }) =>

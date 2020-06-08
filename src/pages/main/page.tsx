@@ -4,6 +4,7 @@ import UpcomingTournamentsTable from './content/upcomingTournaments/upcomingTour
 import Logo from './logo/logo'
 import './style.css';
 import { Redirect } from 'react-router-dom'
+import FadingAnimation from 'components/fading/fading'
 
 interface Props {
   detailsPagePath: string
@@ -59,7 +60,7 @@ export default class MainPage extends React.Component<Props, State> {
     }
 
     return (
-      <div>
+      <FadingAnimation>
         <nav>
           <PageNavbar
             onLogin={this.onLogin}
@@ -72,7 +73,7 @@ export default class MainPage extends React.Component<Props, State> {
         <section>
           <UpcomingTournamentsTable onTournamentClick={id => this.onRedirect(this.props.detailsPagePath, {id})} />
         </section>
-      </div>
+      </FadingAnimation>
     )
   }
 }
