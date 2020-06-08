@@ -2,7 +2,7 @@ import { Register } from "models/user";
 import React from "react";
 import server_info from 'config/server.json'
 import * as vld from 'validation/user'
-import './style.css';
+import 'components/dialogs/style.css';
 
 interface Props {
   onError: (error) => void
@@ -107,87 +107,89 @@ export default class RegisterDialog extends React.Component<Props, State> {
   }
 
   render = () => {
-    return (
-      this.state.show &&
-      (<div className="container">
-        <form id="register-form" onSubmit={this.onSubmit}>
-          <div className="form-group">
-            <label className="form-check-label">Name</label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              className="form-control"
-              ref={r => this.inputsRef["name"] = r}
-            />
-            {!this.state.inputsValidation["name"] && (
-              <div className="invalid-feedback">Wrong name</div>
-            )}
-          </div>
+    if (this.state.show) {
+      return (
+        <div className="container">
+          <form id="register-form" onSubmit={this.onSubmit}>
+            <div className="form-group">
+              <label className="form-check-label">Name</label>
+              <input
+                type="text"
+                name="name"
+                placeholder="Name"
+                className="form-control"
+                ref={r => this.inputsRef["name"] = r}
+              />
+              {!this.state.inputsValidation["name"] && (
+                <div className="invalid-feedback">Wrong name</div>
+              )}
+            </div>
 
-          <div className="form-group">
-            <label className="form-check-label">Lastname</label>
-            <input
-              type="text"
-              name="lastname"
-              placeholder="Lastname"
-              className="form-control"
-              ref={r => this.inputsRef["lastname"] = r}
-            />
-            {!this.state.inputsValidation["lastname"] && (
-              <div className="invalid-feedback">Wrong lastname</div>
-            )}
-          </div>
+            <div className="form-group">
+              <label className="form-check-label">Lastname</label>
+              <input
+                type="text"
+                name="lastname"
+                placeholder="Lastname"
+                className="form-control"
+                ref={r => this.inputsRef["lastname"] = r}
+              />
+              {!this.state.inputsValidation["lastname"] && (
+                <div className="invalid-feedback">Wrong lastname</div>
+              )}
+            </div>
 
-          <div className="form-group">
-            <label className="form-check-label">E-mail</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="name@example.com"
-              className="form-control"
-              ref={r => this.inputsRef["email"] = r}
-            />
-            {!this.state.inputsValidation["email"] && (
-              <div className="invalid-feedback">Wrong e-mail</div>
-            )}
-          </div>
+            <div className="form-group">
+              <label className="form-check-label">E-mail</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="name@example.com"
+                className="form-control"
+                ref={r => this.inputsRef["email"] = r}
+              />
+              {!this.state.inputsValidation["email"] && (
+                <div className="invalid-feedback">Wrong e-mail</div>
+              )}
+            </div>
 
-          <div className="form-group">
-            <label className="form-check-label">Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              className="form-control"
-              ref={r => this.inputsRef["password"] = r}
-            />
-            {!this.state.inputsValidation["password"] && (
-              <div className="invalid-feedback">Wrong password</div>
-            )}
-            <small className="form-text text-muted">
-              Your password must be 8-16 characters long.
+            <div className="form-group">
+              <label className="form-check-label">Password</label>
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                className="form-control"
+                ref={r => this.inputsRef["password"] = r}
+              />
+              {!this.state.inputsValidation["password"] && (
+                <div className="invalid-feedback">Wrong password</div>
+              )}
+              <small className="form-text text-muted">
+                Your password must be 8-16 characters long.
           </small>
-          </div>
+            </div>
 
-          <div className="flex">
-            <input
-              type="submit"
-              className="btn btn-primary"
-              value="Sign Up"
-              id="submit"
-            />
+            <div className="flex">
+              <input
+                type="submit"
+                className="btn btn-primary"
+                value="Sign Up"
+                id="submit"
+              />
 
-            <input
-              type="button"
-              className="btn btn-secondary"
-              value="Cancel"
-              onClick={() => { this.close(); this.props.onCancel() }}
-            />
-          </div>
-        </form>
-      </div>
-      )
-    );
+              <input
+                type="button"
+                className="btn btn-secondary"
+                value="Cancel"
+                onClick={() => { this.close(); this.props.onCancel() }}
+              />
+            </div>
+          </form>
+        </div>
+      );
+    } else {
+      return null
+    }
   }
 }

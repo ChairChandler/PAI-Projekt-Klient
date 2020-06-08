@@ -2,14 +2,17 @@ import React from "react";
 import LoginDialog from 'components/dialogs/login/login';
 import RegisterDialog from 'components/dialogs/registration/registration';
 import ForgotPasswd from 'components/dialogs/forgotPasswd/forgotpasswd';
+import JoinDialog from 'components/dialogs/join/join';
 import server_info from 'config/server.json';
 import Navbar from 'components/navbar/navbar';
-import isLogged from 'utils/is-logged';
+import * as CookiesFunc from 'utils/cookies-functions';
+import { TournamentInfo } from 'models/tournament';
 
-type VisibleDialog = 'login' | 'register' | 'forgotPassword'
+type VisibleDialog = 'login' | 'register' | 'forgotPassword' | 'join'
 type VisibleNavbar = 'unlogged' | 'logged'
 
 interface Props {
+    data: TournamentInfo
     onLogin: (email: string, tokenMaxAge: number) => void
     onLogout: () => void
     onRouteToMainPage: () => void
@@ -18,26 +21,26 @@ interface Props {
 interface State {
     showDialog?: VisibleDialog
     visibleNavbar: VisibleNavbar
+    taking_part_in_tournament?: boolean
+    isOwner: boolean
 }
 
 export default class PageNavbar extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
 
+        const isOwner = CookiesFunc.isPerson(this.props.data.owner_id)
+
         this.state = {
             showDialog: null,
-            visibleNavbar: isLogged() ? 'logged' : 'unlogged'
+            visibleNavbar: CookiesFunc.isLogged() ? 'logged' : 'unlogged',
+            isOwner
         }
     }
 
-    componentDidMount = () => {
-        function removeHash() {
-            window.history.pushState('', document.title, window.location.pathname + window.location.search);
-        }
-
-        if (window.location.hash === '#login') {
-            removeHash()
-            this.openDialog('login')
+    componentDidUpdate = async () => {
+        if (!this.state.isOwner && this.state.visibleNavbar === 'logged') {
+            await this.checkIsTakingPart()
         }
     }
 
@@ -83,7 +86,35 @@ export default class PageNavbar extends React.Component<Props, State> {
         this.setState(state)
     }
 
+    private checkIsTakingPart = async () => {
+        try {
+            const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/list/contestant`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tournament_id: this.props.data.tournament_id })
+            })
+
+            if (!data.ok) {
+                throw Error(await data.text())
+            }
+
+            const json = await data.json()
+            if (this.state.taking_part_in_tournament !== json.taking_part) {
+                const state = { ...this.state }
+                state.taking_part_in_tournament = json.taking_part
+                this.setState(state)
+            }
+        } catch (err) {
+            alert(err.message)
+            return false
+        }
+    }
+
     render = () => {
+        const { current_contestants_amount, participants_limit } = this.props.data
+        const isMaxParticipants = current_contestants_amount === (participants_limit ?? Infinity)
+
         let navbar
         switch (this.state.visibleNavbar) {
             case 'unlogged':
@@ -92,6 +123,12 @@ export default class PageNavbar extends React.Component<Props, State> {
                         <button className='btn btn-primary' id="mainPage" onClick={this.props.onRouteToMainPage}>Main Page</button>
                         <button className='btn btn-primary' id="signIn" onClick={() => this.openDialog('login')}>Sign In</button>
                         <button className='btn btn-primary' id="signUp" onClick={() => this.openDialog('register')}>Sign Up</button>
+                        {
+                            isMaxParticipants ?
+                                null
+                                :
+                                <button className='btn btn-primary' id="join" onClick={() => this.openDialog('login')}>Join</button>
+                        }
                     </Navbar>
                 break;
 
@@ -100,6 +137,16 @@ export default class PageNavbar extends React.Component<Props, State> {
                     <Navbar>
                         <button className='btn btn-primary' id="mainPage" onClick={this.props.onRouteToMainPage}>Main Page</button>
                         <button className='btn btn-primary' id="logout" onClick={this.onLogoutButtonClicked}>Logout</button>
+                        {
+                            this.state.isOwner ?
+                                <button className='btn btn-primary' id="modify" onClick={() => alert('not implemented')}>Modify</button>
+                                :
+                                isMaxParticipants || this.state.taking_part_in_tournament ?
+                                    null
+                                    :
+                                    <button className='btn btn-primary' id="join" onClick={() => this.openDialog('join')}>Join</button>
+                        }
+
                     </Navbar>
         }
 
@@ -111,8 +158,7 @@ export default class PageNavbar extends React.Component<Props, State> {
                         onError={err => alert(err)}
                         onCancel={this.closeDialog}
                         onSuccess={this.onSuccededLogin}
-                        onForgotPassword={() => { this.closeDialog(); this.openDialog('forgotPassword') }}>
-                    </LoginDialog>
+                        onForgotPassword={() => { this.closeDialog(); this.openDialog('forgotPassword') }} />
                 break
 
             case 'register':
@@ -120,8 +166,7 @@ export default class PageNavbar extends React.Component<Props, State> {
                     <RegisterDialog
                         onError={err => alert(err)}
                         onCancel={this.closeDialog}
-                        onSuccess={this.closeDialog}>
-                    </RegisterDialog>
+                        onSuccess={this.closeDialog} />
                 break
 
             case 'forgotPassword':
@@ -129,8 +174,18 @@ export default class PageNavbar extends React.Component<Props, State> {
                     <ForgotPasswd
                         onError={err => alert(err)}
                         onCancel={() => { this.closeDialog(); this.openDialog('login') }}
-                        onSuccess={this.closeDialog}>
-                    </ForgotPasswd>
+                        onSuccess={this.closeDialog} />
+                break
+
+            case 'join':
+                dialog =
+                    <JoinDialog
+                        onError={err => alert(err)}
+                        onCancel={this.closeDialog}
+                        onSuccess={this.closeDialog}
+                        tournament_id={this.props.data.tournament_id}
+                    />
+
                 break
 
             default:

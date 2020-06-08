@@ -4,7 +4,7 @@ import RegisterDialog from 'components/dialogs/registration/registration';
 import ForgotPasswd from 'components/dialogs/forgotPasswd/forgotpasswd';
 import server_info from 'config/server.json';
 import Navbar from 'components/navbar/navbar';
-import isLogged from 'utils/is-logged';
+import * as CookiesFunc from 'utils/cookies-functions';
 
 type VisibleDialog = 'login' | 'register' | 'forgotPassword'
 type VisibleNavbar = 'unlogged' | 'logged'
@@ -25,7 +25,7 @@ export default class PageNavbar extends React.Component<Props, State> {
         
         this.state = {
             showDialog: null,
-            visibleNavbar: isLogged() ? 'logged' : 'unlogged'
+            visibleNavbar: CookiesFunc.isLogged() ? 'logged' : 'unlogged'
         }
     }
 

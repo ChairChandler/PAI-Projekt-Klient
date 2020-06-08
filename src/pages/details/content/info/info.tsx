@@ -1,19 +1,8 @@
 import React from 'react';
 import { Loader } from 'google-maps';
 import './style.css';
+import { TournamentInfo } from 'models/tournament'
 
-export type TournamentInfo = {
-    tournament_name: string
-    description: string | null
-    organizer: string
-    datetime: Date
-    localization_lat: number //latitude
-    localization_lng: number //longitude
-    participants_limit: number | null
-    joining_deadline: Date
-    current_contestants_amount: number
-    logos: { id: number, data: Blob }[]
-}
 
 interface Props {
     data: TournamentInfo
@@ -24,17 +13,21 @@ interface State {
 }
 
 export default class InfoTable extends React.Component<Props, State> {
+    componentWillMount = async () => {
+        await this.componentWillReceiveProps(this.props)
+    }
+    
     componentWillReceiveProps = async (nextProps: Props) => {
         await Promise.all([this.initGoogleMap(nextProps), this.initLogos(nextProps)])
     }
 
-    initGoogleMap = async (props: Props) => {
+    private initGoogleMap = async (props: Props) => {
         const center = {
             lat: props.data?.localization_lat ?? 0,
             lng: props.data?.localization_lng ?? 0
         }
         const mapInfo = { center, zoom: 8 }
-
+        
         const loader = new Loader()
         const google = await loader.load()
         const mapElement = $('#map')[0]
@@ -42,7 +35,7 @@ export default class InfoTable extends React.Component<Props, State> {
         new google.maps.Marker({ position: center, map })
     }
 
-    initLogos = async (props: Props) => {
+    private initLogos = async (props: Props) => {
         const data = props.data.logos.map(({ id, data }) => {
 
             const buffer = Buffer.from(data["data"])
@@ -90,7 +83,7 @@ export default class InfoTable extends React.Component<Props, State> {
                     </tbody>
                 </table>
 
-                <div id="map"/>
+                <div id="map" />
             </div>
 
             {this.state?.logos.length > 0 && <h1>Sponsors</h1>}

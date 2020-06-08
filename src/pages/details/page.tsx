@@ -3,9 +3,10 @@ import PageNavbar from './navbar/navbar'
 import Logo from './logo/logo'
 import './style.css';
 import { Redirect } from "react-router-dom";
-import InfoTable, { TournamentInfo } from './content/info/info'
+import InfoTable from './content/info/info'
 import server_info from 'config/server.json'
 import FadingAnimation from 'components/fading/fading'
+import { TournamentInfo } from 'models/tournament'
 
 interface Props {
     mainPagePath: string
@@ -23,7 +24,7 @@ export default class DetailsPage extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
-        
+
         this.tournamentID = this.props.location.state.id
         this.state = {
             logged: false,
@@ -73,22 +74,27 @@ export default class DetailsPage extends React.Component<Props, State> {
             return <Redirect to={this.state.redirectPath}></Redirect>
         }
 
-        return (
-            <FadingAnimation>
-                <nav>
-                    <PageNavbar
-                        onLogin={this.onLogin}
-                        onLogout={this.onLogout}
-                        onRouteToMainPage={() => this.onRedirect(this.props.mainPagePath)}>
-                    </PageNavbar>
-                </nav>
+        if (this.state.data) {
+            return (
+                <FadingAnimation>
+                    <nav>
+                        <PageNavbar
+                            data={this.state.data}
+                            onLogin={this.onLogin}
+                            onLogout={this.onLogout}
+                            onRouteToMainPage={() => this.onRedirect(this.props.mainPagePath)}>
+                        </PageNavbar>
+                    </nav>
 
-                <Logo />
+                    <Logo />
 
-                <section>
-                    <InfoTable data={this.state.data}/>
-                </section>
-            </FadingAnimation>
-        )
+                    <section>
+                        <InfoTable data={this.state.data} />
+                    </section>
+                </FadingAnimation>
+            )
+        } else {
+            return null
+        }
     }
 }

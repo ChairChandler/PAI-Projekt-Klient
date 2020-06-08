@@ -2,7 +2,7 @@ import { ForgotPasswd } from "models/user";
 import React from "react";
 import server_info from 'config/server.json'
 import * as vld from 'validation/user'
-import './style.css';
+import 'components/dialogs/style.css';
 
 interface Props {
   onError: (error) => void
@@ -83,42 +83,44 @@ export default class LoginDialog extends React.Component<Props, State> {
   }
 
   render = () => {
-    return (
-      this.state.show &&
-      (<div className="container">
-        <form id="register-form" onSubmit={this.onSubmit}>
-          <div className="form-group">
-            <label className="form-check-label">E-mail</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="name@example.com"
-              className="form-control"
-              ref={r => this.inputsRef["email"] = r}
-            />
-            {!this.state.inputsValidation["email"] && (
-              <div className="invalid-feedback">Wrong e-mail</div>
-            )}
-          </div>
+    if (this.state.show) {
+      return (
+        <div className="container">
+          <form id="register-form" onSubmit={this.onSubmit}>
+            <div className="form-group">
+              <label className="form-check-label">E-mail</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="name@example.com"
+                className="form-control"
+                ref={r => this.inputsRef["email"] = r}
+              />
+              {!this.state.inputsValidation["email"] && (
+                <div className="invalid-feedback">Wrong e-mail</div>
+              )}
+            </div>
 
-          <div className="flex">
-            <input
-              type="submit"
-              className="btn btn-primary"
-              value="Remind password"
-              id="submit"
-            />
+            <div className="flex">
+              <input
+                type="submit"
+                className="btn btn-primary"
+                value="Remind password"
+                id="submit"
+              />
 
-            <input
-              type="button"
-              className="btn btn-secondary"
-              value="Cancel"
-              onClick={() => { this.close(); this.props.onCancel() }}
-            />
-          </div>
-        </form>
-      </div>
-      )
-    );
+              <input
+                type="button"
+                className="btn btn-secondary"
+                value="Cancel"
+                onClick={() => { this.close(); this.props.onCancel() }}
+              />
+            </div>
+          </form>
+        </div>
+      );
+    } else {
+      return null
+    }
   }
 }
