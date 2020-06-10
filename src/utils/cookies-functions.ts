@@ -5,5 +5,9 @@ export  function isLogged() {
 }
 
 export function isPerson(id: number) {
-    return Number.parseInt(Cookies.get('id')) === id
+    return getSelfID() === id
+}
+
+export function getSelfID() {
+    return Number.parseInt(Cookies.get('id'))
 }

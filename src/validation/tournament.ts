@@ -1,4 +1,5 @@
 import validationInfo from 'config/validation.json';
+import { getOnlyDate } from 'utils/date'
 
 export function validateName(name: string): boolean {
     const { min, max } = validationInfo.tournament_name
@@ -40,9 +41,6 @@ export function validateJoiningDeadline(date: Date, tournamentDate: Date): boole
 
 
 
-function getOnlyDate(date: Date): Date {
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate())
-}
 
 function isAfterCurrentDate(date: Date): boolean {
     return getOnlyDate(new Date()).getTime() >= getOnlyDate(date).getTime()

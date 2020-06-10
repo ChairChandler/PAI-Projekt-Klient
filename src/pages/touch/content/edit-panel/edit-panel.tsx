@@ -4,14 +4,14 @@ import { Loader } from 'google-maps';
 import validationInfo from 'config/validation.json';
 import server_info from 'config/server.json'
 import * as vld from 'validation/tournament'
+import { getOnlyDateString } from 'utils/date'
 import './style.css';
 
 
 interface Props {
     data: TournamentInfo
-    uniqueId
     onCancel: () => void
-    onSuccess: (data: TournamentInfo) => void
+    onSuccess: () => void
     onError: (err) => void
     action: 'CREATE' | 'EDIT'
 }
@@ -20,7 +20,7 @@ interface State {
     logos?: { id: number, data: string }[]
 }
 
-export default class CardEdit extends React.Component<Props, State> {
+export default class EditPanel extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
         this.state = {}
@@ -109,35 +109,34 @@ export default class CardEdit extends React.Component<Props, State> {
                 throw Error(await data.text())
             }
 
-            this.props.onSuccess(payload)
+            this.props.onSuccess()
         } catch (err) {
             this.props.onError(err)
         }
     }
 
     render = () => {
-        return <form className="container-rows" onSubmit={this.onSubmit}>
+        return <form className="container-context container-rows" onSubmit={this.onSubmit}>
             <div className="form-group">
                 <label className="form-check-label">Tournament name</label>
                 <input
                     type="text"
                     className="form-control"
                     id="name"
-                    min={validationInfo.tournament_name.min}
-                    max={validationInfo.tournament_name.max}
-                    value={this.props.data.tournament_name}
+                    minLength={validationInfo.tournament_name.min}
+                    maxLength={validationInfo.tournament_name.max}
+                    defaultValue={this.props.data.tournament_name}
                 />
                 <small>Text have to be {validationInfo.tournament_name.min}-{validationInfo.tournament_name.max} characters long.</small>
             </div>
 
             <div className="form-group">
                 <label className="form-check-label">Description</label>
-                <input
-                    type="text"
+                <textarea
                     className="form-control"
                     id="description"
-                    max={validationInfo.description.max}
-                    value={this.props.data.description}
+                    maxLength={validationInfo.description.max}
+                    defaultValue={this.props.data.description}
                 />
                 <small>Description have to be max {validationInfo.description.max} characters long.</small>
             </div>
@@ -148,8 +147,8 @@ export default class CardEdit extends React.Component<Props, State> {
                     type="date"
                     className="form-control"
                     id="date"
-                    min={new Date().toString()}
-                    value={this.props.data.datetime?.toString()}
+                    min={getOnlyDateString(new Date())}
+                    defaultValue={this.props.data.datetime ? getOnlyDateString(this.props.data.datetime) : null}
                 />
             </div>
 
@@ -160,7 +159,7 @@ export default class CardEdit extends React.Component<Props, State> {
                     className="form-control"
                     id="limit"
                     min={this.props.data.current_contestants_amount ?? validationInfo.participants_limit.min}
-                    value={this.props.data.participants_limit}
+                    defaultValue={this.props.data.participants_limit}
                 />
 
                 <label className="form-check-label">∞</label>
@@ -176,8 +175,8 @@ export default class CardEdit extends React.Component<Props, State> {
                     type="date"
                     className="form-control"
                     id="deadline"
-                    min={new Date().toString()}
-                    value={this.props.data.joining_deadline?.toString()}
+                    min={getOnlyDateString(new Date())}
+                    defaultValue={this.props.data.joining_deadline ? getOnlyDateString(this.props.data.joining_deadline) : null}
                 />
             </div>
 

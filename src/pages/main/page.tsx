@@ -2,7 +2,7 @@ import React from "react";
 import PageNavbar from './navbar/navbar'
 import UpcomingTournamentsTable from './content/upcomingTournaments/upcomingTournaments'
 import Logo from './logo/logo'
-import './style.css';
+import 'pages/style.css';
 import { Redirect } from 'react-router-dom'
 import FadingAnimation from 'components/fading/fading'
 

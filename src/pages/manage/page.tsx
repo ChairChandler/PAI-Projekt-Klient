@@ -1,7 +1,7 @@
 import React from "react";
 import PageNavbar from './navbar/navbar'
 import Logo from './logo/logo'
-import './style.css';
+import 'pages/style.css';
 import { Redirect } from "react-router-dom";
 import FadingAnimation from 'components/fading/fading'
 import { TournamentInfo } from 'models/tournament'
@@ -32,6 +32,9 @@ export default class ManagePage extends React.Component<Props, State> {
             tableShortData: []
         }
 
+        if(this.state.redirect) {
+            return
+        }
         this.prepareData()
     }
 
@@ -81,13 +84,13 @@ export default class ManagePage extends React.Component<Props, State> {
     private prepareData = async () => {
         const created = await this.retrieveCreatedTournamentsInformation()
         const activities = await this.retrieveContestantTournaments()
-
+        
         const state = { ...this.state }
         state.data = [...created, ...activities]
 
         const tmp: TableHeaders[] = []
         for (const id in state.data) {
-            const o = state.data[id]
+            const o = state.data[id];
             tmp.push({
                 id: Number.parseInt(id),
                 name: o.tournament_name,

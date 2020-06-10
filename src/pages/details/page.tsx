@@ -1,7 +1,7 @@
 import React from "react";
 import PageNavbar from './navbar/navbar'
 import Logo from './logo/logo'
-import './style.css';
+import 'pages/style.css';
 import { Redirect } from "react-router-dom";
 import InfoCard from './content/info/info'
 import server_info from 'config/server.json'
@@ -91,7 +91,6 @@ export default class DetailsPage extends React.Component<Props, State> {
         }
 
         if (this.state.data) {
-            console.log(this.state.data)
             return (
                 <FadingAnimation>
                     <nav>

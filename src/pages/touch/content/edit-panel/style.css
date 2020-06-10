@@ -7,3 +7,9 @@
     word-wrap: break-word;
     margin-right: 10px;
 }
+
+.container-context {
+    box-shadow: grey 1px 1px 4px 0px;
+    padding: 2%;
+    padding-bottom: 2%;
+}
