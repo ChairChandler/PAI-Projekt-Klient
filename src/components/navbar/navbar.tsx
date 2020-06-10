@@ -12,7 +12,7 @@ export default class Navbar extends React.Component<any, State> {
     }
 
     componentDidUpdate = async (prevProps) => {
-        if (prevProps.children.toString() !== this.props.children.toString()) {
+        if (!this.isEqualID(prevProps.children, this.props.children)) {
             await $('#nav').children().animate({opacity: 0}, 200).promise()
             
             this.setState({ children: this.props.children })
@@ -20,6 +20,8 @@ export default class Navbar extends React.Component<any, State> {
             await $('#nav').children().css({opacity: 0}).animate({opacity: 1}, 200).promise()
         }
     }
+
+    isEqualID = (a, b): boolean => a.length === b.length && a.every((o, i) => o.props.id === b[i].props.id)
 
     render = () => {
         return <div id="nav">{this.state.children}</div>

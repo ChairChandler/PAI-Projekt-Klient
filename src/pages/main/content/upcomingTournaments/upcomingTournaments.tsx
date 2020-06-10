@@ -14,9 +14,9 @@ interface State {
 
 export default class UpcomingTournamentsTable extends React.Component<Props, State> {
     private HEADERS = [
-        { title: 'ID', field: 'id', hidden: true},
+        { title: 'ID', field: 'id', hidden: true },
         { title: 'Name', field: 'name' },
-        { title: 'Date', field: 'date'}
+        { title: 'Date', field: 'date' }
     ]
     private INTERVAL_TIME_SEC = 5
 
@@ -36,7 +36,7 @@ export default class UpcomingTournamentsTable extends React.Component<Props, Sta
         $('.Component-paginationSelectRoot-4').remove()
     }
 
-    componentDidUpdate = () => { 
+    componentDidUpdate = () => {
         $('.Component-paginationSelectRoot-4').remove()
     }
 
@@ -57,7 +57,7 @@ export default class UpcomingTournamentsTable extends React.Component<Props, Sta
             title="Upcoming Tournaments"
             columns={this.HEADERS}
             data={this.state.data}
-            options={{draggable: false, pageSize: 10}}
-            onRowClick={(event, data) => this.props.onTournamentClick(data.id)}/>
+            options={{ draggable: false, pageSize: 10 }}
+            onRowClick={(event, data) => this.props.onTournamentClick(data.id)} />
     }
 }

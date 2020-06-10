@@ -1,4 +1,5 @@
 {
     "main": "/main",
-    "details": "/details"
+    "details": "/details",
+    "manage": "/manage"
 }

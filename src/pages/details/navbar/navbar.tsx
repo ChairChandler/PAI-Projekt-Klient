@@ -36,9 +36,16 @@ export default class PageNavbar extends React.Component<Props, State> {
             visibleNavbar: CookiesFunc.isLogged() ? 'logged' : 'unlogged',
             isOwner
         }
+
+        this.componentDidUpdate()
     }
 
     componentDidUpdate = async () => {
+        const isOwner = CookiesFunc.isPerson(this.props.data.owner_id)
+        const state = { ...this.state }
+        state.isOwner = isOwner
+        this.state = state
+
         if (!this.state.isOwner && this.state.visibleNavbar === 'logged') {
             await this.checkIsTakingPart()
         }
@@ -88,11 +95,10 @@ export default class PageNavbar extends React.Component<Props, State> {
 
     private checkIsTakingPart = async () => {
         try {
-            const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/list/contestant`, {
-                method: 'POST',
+            const id = this.props.data.tournament_id
+            const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/contestants?tournament_id=${id}`, {
                 credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tournament_id: this.props.data.tournament_id })
+                headers: { 'Content-Type': 'application/json' }
             })
 
             if (!data.ok) {

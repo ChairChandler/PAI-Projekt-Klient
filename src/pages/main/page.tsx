@@ -8,6 +8,7 @@ import FadingAnimation from 'components/fading/fading'
 
 interface Props {
   detailsPagePath: string
+  managePagePath: string
 }
 
 interface State {
@@ -63,6 +64,7 @@ export default class MainPage extends React.Component<Props, State> {
       <FadingAnimation>
         <nav>
           <PageNavbar
+            onManage={() => this.onRedirect(this.props.managePagePath, {})}
             onLogin={this.onLogin}
             onLogout={this.onLogout}>
           </PageNavbar>
@@ -71,7 +73,7 @@ export default class MainPage extends React.Component<Props, State> {
         <Logo />
 
         <section>
-          <UpcomingTournamentsTable onTournamentClick={id => this.onRedirect(this.props.detailsPagePath, {id})} />
+          <UpcomingTournamentsTable onTournamentClick={id => this.onRedirect(this.props.detailsPagePath, { id })} />
         </section>
       </FadingAnimation>
     )

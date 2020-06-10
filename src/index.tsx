@@ -5,7 +5,8 @@ import MainPage from 'pages/main/page';
 import * as serviceWorker from './serviceWorker';
 import { Switch, Route, Redirect, BrowserRouter } from 'react-router-dom';
 import DetailsPage from 'pages/details/page';
-import routing_info from 'config/routing.json'
+import routing_info from 'config/routing.json';
+import ManagePage from'pages/manage/page'
 
 
 ReactDOM.render(
@@ -13,12 +14,16 @@ ReactDOM.render(
     <BrowserRouter>
       <Switch>
         <Route exact path={routing_info.main}>
-          <MainPage detailsPagePath={routing_info.details}/>
+          <MainPage detailsPagePath={routing_info.details} managePagePath={routing_info.manage}/>
         </Route>
 
         <Route exact path={routing_info.details} render={props => 
           <DetailsPage {...props} mainPagePath={routing_info.main}/>}/>
 
+        <Route exact path={routing_info.manage}>
+          <ManagePage mainPagePath={routing_info.main}/>
+        </Route>
+        
         <Redirect to={routing_info.main}></Redirect>
       </Switch>
     </BrowserRouter>

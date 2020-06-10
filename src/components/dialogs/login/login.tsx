@@ -15,7 +15,6 @@ interface Props {
 interface State {
   inputsValidation: {
     email: boolean
-    password: boolean
   },
   first: boolean
   show: boolean
@@ -32,8 +31,7 @@ export default class LoginDialog extends React.Component<Props, State> {
 
     this.state = {
       inputsValidation: {
-        email: true,
-        password: true,
+        email: true
       },
       first: true,
       show: true
@@ -50,10 +48,6 @@ export default class LoginDialog extends React.Component<Props, State> {
       email: {
         flag: vld.validateEmail(email),
         ref: this.inputsRef.email
-      },
-      password: {
-        flag: vld.validatePassword(password),
-        ref: this.inputsRef.password
       }
     };
 
@@ -111,6 +105,7 @@ export default class LoginDialog extends React.Component<Props, State> {
         <div className="container">
           <form id="register-form" onSubmit={this.onSubmit}>
             <div className="form-group">
+
               <label className="form-check-label">E-mail</label>
               <input
                 type="email"
@@ -123,6 +118,7 @@ export default class LoginDialog extends React.Component<Props, State> {
                 <div className="invalid-feedback">Wrong e-mail</div>
               )}
             </div>
+
 
             <div className="form-group">
               <label className="form-check-label">Password</label>
@@ -138,7 +134,7 @@ export default class LoginDialog extends React.Component<Props, State> {
               )}
               <small className="form-text text-muted">
                 Your password must be 8-16 characters long.
-          </small>
+              </small>
             </div>
 
             <div className="flex">

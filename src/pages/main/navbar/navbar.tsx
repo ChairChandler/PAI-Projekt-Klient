@@ -10,6 +10,7 @@ type VisibleDialog = 'login' | 'register' | 'forgotPassword'
 type VisibleNavbar = 'unlogged' | 'logged'
 
 interface Props {
+    onManage: () => void
     onLogin: (email: string, tokenMaxAge: number) => void
     onLogout: () => void
 }
@@ -22,7 +23,7 @@ interface State {
 export default class PageNavbar extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
-        
+
         this.state = {
             showDialog: null,
             visibleNavbar: CookiesFunc.isLogged() ? 'logged' : 'unlogged'
@@ -97,9 +98,10 @@ export default class PageNavbar extends React.Component<Props, State> {
                 navbar =
                     <Navbar>
                         <button className='btn btn-primary' id="logout" onClick={this.onLogoutButtonClicked}>Logout</button>
+                        <button className='btn btn-primary' id="logout" onClick={this.props.onManage}>Manage tournaments</button>
                     </Navbar>
         }
-
+        
         let dialog
         switch (this.state.showDialog) {
             case 'login':

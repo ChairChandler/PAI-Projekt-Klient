@@ -1,22 +1,21 @@
 import React from 'react';
 import { Loader } from 'google-maps';
 import './style.css';
-import { TournamentInfo } from 'models/tournament'
-
+import { TournamentInfo } from 'models/tournament';
 
 interface Props {
     data: TournamentInfo
 }
 
 interface State {
-    logos: { id: number, data: string }[]
+    logos?: { id: number, data: string }[]
 }
 
-export default class InfoTable extends React.Component<Props, State> {
+export default class InfoCard extends React.Component<Props, State> {
     componentWillMount = async () => {
         await this.componentWillReceiveProps(this.props)
     }
-    
+
     componentWillReceiveProps = async (nextProps: Props) => {
         await Promise.all([this.initGoogleMap(nextProps), this.initLogos(nextProps)])
     }
@@ -27,10 +26,10 @@ export default class InfoTable extends React.Component<Props, State> {
             lng: props.data?.localization_lng ?? 0
         }
         const mapInfo = { center, zoom: 8 }
-        
+
         const loader = new Loader()
         const google = await loader.load()
-        const mapElement = $('#map')[0]
+        const mapElement = $(`#map`)[0]
         const map = new google.maps.Map(mapElement, mapInfo)
         new google.maps.Marker({ position: center, map })
     }
@@ -47,7 +46,6 @@ export default class InfoTable extends React.Component<Props, State> {
         const state = { ...this.state }
         state.logos = data
         this.setState(state)
-
     }
 
     render = () => {
@@ -83,16 +81,18 @@ export default class InfoTable extends React.Component<Props, State> {
                     </tbody>
                 </table>
 
-                <div id="map" />
+                <div id='map' />
             </div>
 
-            {this.state?.logos.length > 0 && <h1>Sponsors</h1>}
-            <div id="tournament-container-logo" className="container-cols">
-                {
-                    this.state?.logos.map(({ id, data }) =>
-                        <img className="tournament-logo" src={data} alt={`logo_${id}`}></img>)
-                }
-            </div>
+            {this.state?.logos.length > 0 &&
+                <h1>Sponsors</h1> &&
+                <div id="tournament-container-logo" className="container-cols">
+                    {
+                        this.state.logos.map(({ id, data }) =>
+                            <img className="tournament-logo" src={data} alt={`logo_${id}`}></img>)
+                    }
+                </div>
+            }
         </div >
     }
 }

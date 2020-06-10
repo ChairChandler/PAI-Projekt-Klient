@@ -3,7 +3,7 @@ import PageNavbar from './navbar/navbar'
 import Logo from './logo/logo'
 import './style.css';
 import { Redirect } from "react-router-dom";
-import InfoTable from './content/info/info'
+import InfoCard from './content/info/info'
 import server_info from 'config/server.json'
 import FadingAnimation from 'components/fading/fading'
 import { TournamentInfo } from 'models/tournament'
@@ -25,9 +25,14 @@ export default class DetailsPage extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
 
+        if(!this.props.location.state) {
+            this.state = {logged: false, redirectPath: this.props.mainPagePath}
+            return
+        }
+
         this.tournamentID = this.props.location.state.id
         this.state = {
-            logged: false,
+            logged: false
         }
 
         this.retrieveTournamentInformation()
@@ -89,7 +94,7 @@ export default class DetailsPage extends React.Component<Props, State> {
                     <Logo />
 
                     <section>
-                        <InfoTable data={this.state.data} />
+                        <InfoCard data={this.state.data} />
                     </section>
                 </FadingAnimation>
             )

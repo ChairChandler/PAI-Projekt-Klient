@@ -1,0 +1,50 @@
+.container-context {
+    box-shadow: grey 1px 1px 4px 0px;
+    padding: 2%;
+    padding-bottom: 2%;
+}
+
+.container-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+tr {
+    border-bottom: 1px solid rgba(71, 67, 67, 0.493);
+}
+
+tr:last-of-type {
+    border-bottom: none;
+}
+
+div[id^=map_] {
+    height: 400px;
+    width: 600px;
+}
+
+table {
+    width: 100%;
+}
+
+.container-cols {
+    display: flex;
+}
+
+.container-cols > * {
+    margin-right: 5%;
+    margin-top: 2%;
+}
+
+.container-cols > *:last-child {
+    margin-right: 0% !important;
+}
+
+#tournament-container-logo {
+    flex-wrap: wrap
+}
+
+.tournament-logo {
+    width: 20%;
+    height: 20%;
+    border-radius: 100%;
+}
