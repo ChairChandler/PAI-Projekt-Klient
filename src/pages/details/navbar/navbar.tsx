@@ -15,7 +15,7 @@ interface Props {
     data: TournamentInfo
     onLogin: (email: string, tokenMaxAge: number) => void
     onLogout: () => void
-    onRouteToMainPage: () => void
+    onBack: () => void
 }
 
 interface State {
@@ -126,7 +126,7 @@ export default class PageNavbar extends React.Component<Props, State> {
             case 'unlogged':
                 navbar =
                     <Navbar>
-                        <button className='btn btn-primary' id="mainPage" onClick={this.props.onRouteToMainPage}>Main Page</button>
+                        <button className='btn btn-primary' id="mainPage" onClick={this.props.onBack}>Back</button>
                         <button className='btn btn-primary' id="signIn" onClick={() => this.openDialog('login')}>Sign In</button>
                         <button className='btn btn-primary' id="signUp" onClick={() => this.openDialog('register')}>Sign Up</button>
                         {
@@ -141,7 +141,7 @@ export default class PageNavbar extends React.Component<Props, State> {
             case 'logged':
                 navbar =
                     <Navbar>
-                        <button className='btn btn-primary' id="mainPage" onClick={this.props.onRouteToMainPage}>Main Page</button>
+                        <button className='btn btn-primary' id="mainPage" onClick={this.props.onBack}>Back</button>
                         <button className='btn btn-primary' id="logout" onClick={this.onLogoutButtonClicked}>Logout</button>
                         {
                             this.state.isOwner ?

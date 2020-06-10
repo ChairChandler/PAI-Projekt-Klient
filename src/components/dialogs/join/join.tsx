@@ -66,7 +66,7 @@ export default class JoinDialog extends React.Component<Props, State> {
         if (this.state.show) {
             return (
                 <div className="container">
-                    <form id="register-form" onSubmit={this.onSubmit}>
+                    <form className="dialog-form" onSubmit={this.onSubmit}>
                         <div className="form-group">
                             <label className="form-check-label">License ID</label>
                             <input

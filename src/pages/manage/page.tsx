@@ -6,18 +6,21 @@ import { Redirect } from "react-router-dom";
 import FadingAnimation from 'components/fading/fading'
 import { TournamentInfo } from 'models/tournament'
 import server_info from 'config/server.json'
-import CardTable from './content/info/info'
 import * as CookiesFun from 'utils/cookies-functions'
+import MyTournamentsTable, { TableHeaders } from './content/my-tournaments/my-tournaments'
 
 type TournamentShortInfo = { id: number, name: string, date: Date }
 
 interface Props {
     mainPagePath: string
+    detailsPagePath: string
+    touchPagePath: string //touch = create or modify
 }
 
 interface State {
-    redirectPath?: string
-    data?: {data: TournamentInfo, show: boolean}[]
+    redirect?: { path: string, data?: any }
+    data?: TournamentInfo[]
+    tableShortData: TableHeaders[]
 }
 
 export default class ManagePage extends React.Component<Props, State> {
@@ -25,10 +28,11 @@ export default class ManagePage extends React.Component<Props, State> {
         super(props)
 
         this.state = {
-            redirectPath: CookiesFun.isLogged() ? null : this.props.mainPagePath,
+            redirect: CookiesFun.isLogged() ? null : { path: this.props.mainPagePath },
+            tableShortData: []
         }
 
-        this.retrieveTournamentsInformation()
+        this.prepareData()
     }
 
     private retrieveTournamentsList = async (): Promise<TournamentShortInfo[]> => {
@@ -40,48 +44,75 @@ export default class ManagePage extends React.Component<Props, State> {
         return data.json()
     }
 
-    private retrieveTournamentsInformation = async () => {
+    private retrieveCreatedTournamentsInformation = async (): Promise<TournamentInfo[]> => {
         const list = await this.retrieveTournamentsList()
 
         const info = await Promise.all(
             list.map(async (v): Promise<TournamentInfo> => {
-                const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/info?tournament_id=${v.id}`)
-                if (!data.ok) {
-                    console.warn('Failed to retrieve tourament informations')
+                try {
+                    const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/info?tournament_id=${v.id}`)
+                    if (!data.ok) {
+                        throw Error('Failed to retrieve tourament informations')
+                    }
+                    return await data.json()
+                } catch (err) {
+                    console.error(err)
                 }
-
-                return await data.json()
             }))
 
-
-        const state = { ...this.state }
-        state.data = info.filter(v => CookiesFun.isPerson(v.owner_id)).map(v => ({data: v, show: false}))
-        this.setState(state)
+        return info.filter(v => CookiesFun.isPerson(v.owner_id))
     }
 
-    private onRedirectToMainPage = () => {
-        const state = { ...this.state }
-        state.redirectPath = this.props.mainPagePath
-        this.setState(state)
-    }
-
-    private handleCards = (id) => {
-        const state = { ...this.state }
-        if(state.data[id].show) {
-            state.data[id].show = false
-        } else {
-            for(const i in state.data) {
-                state.data[i].show = false
+    private retrieveContestantTournaments = async (): Promise<TournamentInfo[]> => {
+        try {
+            const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/list/contestant`, {
+                credentials: 'include'
+            })
+            if (!data.ok) {
+                new Error('Failed to retrieve contestant touraments list')
             }
-            state.data[id].show = true
+
+            return data.json()
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
+    private prepareData = async () => {
+        const created = await this.retrieveCreatedTournamentsInformation()
+        const activities = await this.retrieveContestantTournaments()
+
+        const state = { ...this.state }
+        state.data = [...created, ...activities]
+
+        const tmp: TableHeaders[] = []
+        for (const id in state.data) {
+            const o = state.data[id]
+            tmp.push({
+                id: Number.parseInt(id),
+                name: o.tournament_name,
+                date: o.datetime,
+                take_part: !CookiesFun.isPerson(o.owner_id),
+                finished: new Date(o.datetime).getTime() < new Date().getTime()
+            })
         }
 
+        state.tableShortData = tmp
+        this.setState(state)
+    }
+
+    private onRedirectToPage = (path: string, data?: any) => {
+        const state = { ...this.state }
+        state.redirect = { path, data }
         this.setState(state)
     }
 
     render = () => {
-        if (this.state.redirectPath) {
-            return <Redirect to={this.state.redirectPath}></Redirect>
+        if (this.state.redirect) {
+            return <Redirect to={{
+                pathname: this.state.redirect.path,
+                state: this.state.redirect.data
+            }}></Redirect>
         }
 
         if (this.state.data) {
@@ -89,20 +120,19 @@ export default class ManagePage extends React.Component<Props, State> {
                 <FadingAnimation>
                     <nav>
                         <PageNavbar
-                            onLogout={this.onRedirectToMainPage}
-                            onRouteToMainPage={this.onRedirectToMainPage}>
+                            onLogout={() => this.onRedirectToPage(this.props.mainPagePath)}
+                            onRouteToMainPage={() => this.onRedirectToPage(this.props.mainPagePath)}>
                         </PageNavbar>
                     </nav>
 
                     <Logo />
 
-                    {
-                        this.state.data.map((v,i) =>
-                            <section key={i}>
-                                <CardTable uniqueId={i} data={v.data} show={v.show} onClickTitle={this.handleCards}/>
-                            </section>
-                        )
-                    }
+                    <MyTournamentsTable
+                        data={this.state.tableShortData}
+                        onShow={(id: number) => this.onRedirectToPage(this.props.detailsPagePath, { data: this.state.data[id] })}
+                        onEdit={(id: number) => this.onRedirectToPage(this.props.touchPagePath, { data: this.state.data[id] })}
+                        onCreate={() => this.onRedirectToPage(this.props.touchPagePath)}
+                    />
 
                 </FadingAnimation>
             )

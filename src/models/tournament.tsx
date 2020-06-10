@@ -1,6 +1,6 @@
 export class TournamentInfo {
     constructor(
-        public tournament_id: number,
+        public tournament_id?: number,
         public tournament_name?: string,
         public owner_id?: number,
         public description?: string | null,

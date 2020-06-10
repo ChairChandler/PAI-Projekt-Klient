@@ -38,7 +38,7 @@ export default class LoginDialog extends React.Component<Props, State> {
     }
   }
 
-  private onSubmit = async (event): Promise<void> => {
+  private onSubmit = async (event) => {
     event.preventDefault();
 
     const email = this.inputsRef.email.value;
@@ -103,7 +103,7 @@ export default class LoginDialog extends React.Component<Props, State> {
     if (this.state.show) {
       return (
         <div className="container">
-          <form id="register-form" onSubmit={this.onSubmit}>
+          <form className="dialog-form" onSubmit={this.onSubmit}>
             <div className="form-group">
 
               <label className="form-check-label">E-mail</label>

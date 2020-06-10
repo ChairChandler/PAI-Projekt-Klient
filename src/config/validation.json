@@ -1,0 +1,5 @@
+{
+    "tournament_name": {"min": 8, "max": 24},
+    "description": {"max": 255},
+    "participants_limit": {"min": 1}
+}

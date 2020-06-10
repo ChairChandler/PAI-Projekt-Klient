@@ -86,7 +86,7 @@ export default class LoginDialog extends React.Component<Props, State> {
     if (this.state.show) {
       return (
         <div className="container">
-          <form id="register-form" onSubmit={this.onSubmit}>
+          <form onSubmit={this.onSubmit} className="dialog-form">
             <div className="form-group">
               <label className="form-check-label">E-mail</label>
               <input

@@ -10,6 +10,7 @@ import { TournamentInfo } from 'models/tournament'
 
 interface Props {
     mainPagePath: string
+    managePagePath: string
     location
 }
 
@@ -17,29 +18,39 @@ interface State {
     logged: boolean
     data?: TournamentInfo
     redirectPath?: string
+    tournamentID?: number
+    backPath?: string
 }
 
 export default class DetailsPage extends React.Component<Props, State> {
-    private tournamentID: number
 
     constructor(props: Props) {
         super(props)
 
-        if(!this.props.location.state) {
-            this.state = {logged: false, redirectPath: this.props.mainPagePath}
+        if (!this.props.location.state) {
+            this.state = { logged: false, redirectPath: this.props.mainPagePath }
             return
         }
 
-        this.tournamentID = this.props.location.state.id
-        this.state = {
-            logged: false
+        const recvState = this.props.location.state
+        if (recvState.data) {
+            this.state = {
+                logged: false,
+                data: recvState.data,
+                backPath: this.props.managePagePath
+            }
+        } else {
+            this.state = {
+                logged: false,
+                tournamentID: recvState.id,
+                backPath: this.props.mainPagePath
+            }
+            this.retrieveTournamentInformation()
         }
-
-        this.retrieveTournamentInformation()
     }
 
     private retrieveTournamentInformation = async () => {
-        const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/info?tournament_id=${this.tournamentID}`)
+        const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/info?tournament_id=${this.state.tournamentID}`)
         if (!data.ok) {
             console.warn('Failed to retrieve tourament informations')
         }
@@ -80,6 +91,7 @@ export default class DetailsPage extends React.Component<Props, State> {
         }
 
         if (this.state.data) {
+            console.log(this.state.data)
             return (
                 <FadingAnimation>
                     <nav>
@@ -87,7 +99,7 @@ export default class DetailsPage extends React.Component<Props, State> {
                             data={this.state.data}
                             onLogin={this.onLogin}
                             onLogout={this.onLogout}
-                            onRouteToMainPage={() => this.onRedirect(this.props.mainPagePath)}>
+                            onBack={() => this.onRedirect(this.state.backPath)}>
                         </PageNavbar>
                     </nav>
 

@@ -18,10 +18,17 @@ ReactDOM.render(
         </Route>
 
         <Route exact path={routing_info.details} render={props => 
-          <DetailsPage {...props} mainPagePath={routing_info.main}/>}/>
+          <DetailsPage {...props} 
+          mainPagePath={routing_info.main}
+          managePagePath={routing_info.manage}
+          />}/>
 
         <Route exact path={routing_info.manage}>
-          <ManagePage mainPagePath={routing_info.main}/>
+          <ManagePage 
+          mainPagePath={routing_info.main}
+          detailsPagePath={routing_info.details}
+          touchPagePath={routing_info.touch}
+          />
         </Route>
         
         <Redirect to={routing_info.main}></Redirect>

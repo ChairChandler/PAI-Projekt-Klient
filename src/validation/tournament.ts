@@ -1,17 +1,14 @@
-export function validateTournamentName(name: string): boolean {
-    if (name === undefined) {
-        return false;
-    }
+import validationInfo from 'config/validation.json';
 
-    return 8 <= name.length && name.length <= 24
+export function validateName(name: string): boolean {
+    const { min, max } = validationInfo.tournament_name
+    const length = name?.length
+    return min <= length && length <= max
 }
 
-export function validateDescription(name: string): boolean {
-    if (name === undefined) {
-        return false;
-    }
-
-    return name.length <= 255
+export function validateDescription(description: string): boolean {
+    const { max } = validationInfo.description
+    return description?.length <= max
 }
 
 export function validateDatetime(date: Date): boolean {
@@ -23,15 +20,15 @@ export function validateDatetime(date: Date): boolean {
 }
 
 export function validateParticipantsLimit(participantsAmount: number, limit?: number): boolean {
-    if(participantsAmount === undefined) {
+    if (participantsAmount === undefined) {
         return false;
     }
-    
+
     return limit == null || limit >= participantsAmount
 }
 
 export function validateJoiningDeadline(date: Date, tournamentDate: Date): boolean {
-    if (date === undefined) {
+    if (date === undefined || tournamentDate === undefined) {
         return false;
     }
 
