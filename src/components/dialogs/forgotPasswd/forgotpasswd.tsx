@@ -5,9 +5,9 @@ import * as vld from 'validation/user'
 import 'components/dialogs/style.css';
 
 interface Props {
-  onError: (error) => void
-  onSuccess: (data) => void
-  onCancel: () => void
+  onError?: (error) => void
+  onSuccess?: (data) => void
+  onCancel?: () => void
 }
 
 interface State {
@@ -74,8 +74,8 @@ export default class LoginDialog extends React.Component<Props, State> {
   private sendData = (payload: ForgotPasswd) => {
     $.get(`http://${server_info.ip}:${server_info.port}/user/login`, payload, data => {
       this.close()
-      this.props.onSuccess(data)
-    }).fail(err => this.props.onError(err.responseText))
+      this.props.onSuccess?.(data)
+    }).fail(err => this.props.onError?.(err.responseText))
   }
 
   private close = () => {
@@ -113,7 +113,7 @@ export default class LoginDialog extends React.Component<Props, State> {
                 type="button"
                 className="btn btn-secondary"
                 value="Cancel"
-                onClick={() => { this.close(); this.props.onCancel() }}
+                onClick={() => { this.close(); this.props.onCancel?.() }}
               />
             </div>
           </form>

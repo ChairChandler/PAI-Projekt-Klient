@@ -1,15 +1,14 @@
 import { Login } from "models/user";
 import React from "react";
-import server_info from 'config/server.json'
 import * as vld from 'validation/user'
-import Cookies from 'js-cookie'
+import LoginService from "services/login"
 import 'components/dialogs/style.css';
 
 interface Props {
-  onError: (error) => void
-  onSuccess: (email: string, tokenMaxAge: number) => void
-  onCancel: () => void
-  onForgotPassword: () => void
+  onError?: (error) => void
+  onSuccess?: () => void
+  onCancel?: () => void
+  onForgotPassword?: () => void
 }
 
 interface State {
@@ -61,7 +60,15 @@ export default class LoginDialog extends React.Component<Props, State> {
 
     if (validated) {
       const user = new Login(email, password);
-      await this.sendData(user)
+      const {isLogged, error} = await LoginService.login(user)
+      if(isLogged) {
+        this.close()
+        this.props.onSuccess?.()
+      }
+
+      if(error) {
+        this.props.onError?.(error)
+      }
     }
   }
 
@@ -72,26 +79,6 @@ export default class LoginDialog extends React.Component<Props, State> {
     } else {
       input.classList.remove('is-valid');
       input.classList.add('is-invalid');
-    }
-  }
-
-  private sendData = async (payload: Login) => {
-    try {
-      const data = await fetch(`http://${server_info.ip}:${server_info.port}/user/login`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-
-      if (!data.ok) {
-        throw Error(await data.text())
-      }
-
-      this.close()
-      this.props.onSuccess(payload.email, Number.parseInt(Cookies.get('token-expiration-date')))
-    } catch (err) {
-      this.props.onError(err)
     }
   }
 
@@ -149,14 +136,14 @@ export default class LoginDialog extends React.Component<Props, State> {
                 type="button"
                 className="btn btn-secondary"
                 value="Forgot password"
-                onClick={() => { this.close(); this.props.onForgotPassword() }}
+                onClick={() => { this.close(); this.props.onForgotPassword?.() }}
               />
 
               <input
                 type="button"
                 className="btn btn-secondary"
                 value="Cancel"
-                onClick={() => { this.close(); this.props.onCancel() }}
+                onClick={() => { this.close(); this.props.onCancel?.() }}
               />
             </div>
           </form>

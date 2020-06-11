@@ -12,7 +12,6 @@ interface Props {
 }
 
 interface State {
-  logged: boolean
   redirect?: {
     path: string
     data: any
@@ -22,28 +21,7 @@ interface State {
 export default class MainPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
-
-    this.state = {
-      logged: false
-    }
-  }
-
-  private onLogin = (email: string, tokenMaxAge: number) => {
-    setTimeout(() => {
-      const state = { ...this.state }
-      state.logged = false
-      this.setState(state);
-    }, tokenMaxAge);
-
-    const state = { ...this.state }
-    state.logged = true
-    this.setState(state);
-  }
-
-  private onLogout = () => {
-    const state = { ...this.state }
-    state.logged = false
-    this.setState(state);
+    this.state = {}
   }
 
   private onRedirect = (path: string, data) => {
@@ -64,10 +42,8 @@ export default class MainPage extends React.Component<Props, State> {
       <FadingAnimation>
         <nav>
           <PageNavbar
-            onManage={() => this.onRedirect(this.props.managePagePath, {})}
-            onLogin={this.onLogin}
-            onLogout={this.onLogout}>
-          </PageNavbar>
+            onManageClick={() => this.onRedirect(this.props.managePagePath, {})}
+          />
         </nav>
 
         <Logo />

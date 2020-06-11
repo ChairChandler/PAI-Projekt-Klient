@@ -2,31 +2,27 @@ import React from "react";
 import LoginDialog from 'components/dialogs/login/login';
 import RegisterDialog from 'components/dialogs/registration/registration';
 import ForgotPasswd from 'components/dialogs/forgotPasswd/forgotpasswd';
-import server_info from 'config/server.json';
 import Navbar from 'components/navbar/navbar';
-import * as CookiesFunc from 'utils/cookies-functions';
+import LoginSubscriber from 'components/subscriber/login/login-subscriber'
+import LoginService from 'services/login'
 
 type VisibleDialog = 'login' | 'register' | 'forgotPassword'
 type VisibleNavbar = 'unlogged' | 'logged'
 
 interface Props {
-    onManage: () => void
-    onLogin: (email: string, tokenMaxAge: number) => void
-    onLogout: () => void
+    onManageClick: () => void
 }
 
 interface State {
     showDialog?: VisibleDialog
-    visibleNavbar: VisibleNavbar
+    visibleNavbar?: VisibleNavbar
 }
 
 export default class PageNavbar extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
-
         this.state = {
-            showDialog: null,
-            visibleNavbar: CookiesFunc.isLogged() ? 'logged' : 'unlogged'
+            visibleNavbar: LoginService.isAccountLoggedIn() ? 'logged' : 'unlogged'
         }
     }
 
@@ -42,27 +38,10 @@ export default class PageNavbar extends React.Component<Props, State> {
     }
 
     private onLogoutButtonClicked = async () => {
-        try {
-            const data = await fetch(`http://${server_info.ip}:${server_info.port}/user/login`, {
-                method: 'DELETE',
-                credentials: 'include'
-            })
-
-            if (!data.ok) {
-                throw Error(await data.text())
-            }
-
-            this.changeNavbar('unlogged')
-            this.props.onLogout()
-        } catch (err) {
-            alert(err.responseText)
+        const { error } = await LoginService.logout()
+        if (error) {
+            alert(error)
         }
-    }
-
-    private onSuccededLogin = (email: string, tokenMaxAge: number) => {
-        this.closeDialog();
-        this.changeNavbar('logged')
-        this.props.onLogin(email, tokenMaxAge)
     }
 
     private changeNavbar = (navbar: VisibleNavbar) => {
@@ -98,10 +77,14 @@ export default class PageNavbar extends React.Component<Props, State> {
                 navbar =
                     <Navbar>
                         <button className='btn btn-primary' id="logout" onClick={this.onLogoutButtonClicked}>Logout</button>
-                        <button className='btn btn-primary' id="logout" onClick={this.props.onManage}>Manage tournaments</button>
+                        <button className='btn btn-primary' id="logout" onClick={this.props.onManageClick}>Manage tournaments</button>
                     </Navbar>
+                break
+
+            default:
+                navbar = null
         }
-        
+
         let dialog
         switch (this.state.showDialog) {
             case 'login':
@@ -109,7 +92,7 @@ export default class PageNavbar extends React.Component<Props, State> {
                     <LoginDialog
                         onError={err => alert(err)}
                         onCancel={this.closeDialog}
-                        onSuccess={this.onSuccededLogin}
+                        onSuccess={this.closeDialog}
                         onForgotPassword={() => { this.closeDialog(); this.openDialog('forgotPassword') }}>
                     </LoginDialog>
                 break
@@ -136,6 +119,14 @@ export default class PageNavbar extends React.Component<Props, State> {
                 dialog = null
         }
 
-        return <>{navbar}{dialog}</>
+        return <>
+            {navbar}
+            {dialog}
+            <LoginSubscriber
+                onLogin={() => this.changeNavbar('logged')}
+                onLogout={() => this.changeNavbar('unlogged')}
+                onError={(err) => alert(err)}
+            />
+        </>
     }
 }

@@ -4,9 +4,10 @@ import Logo from './logo/logo'
 import { Redirect } from "react-router-dom";
 import FadingAnimation from 'components/fading/fading'
 import { TournamentInfo } from 'models/tournament'
-import * as CookiesFun from 'utils/cookies-functions'
-import 'pages/style.css';
 import EditPanel from "./content/edit-panel/edit-panel";
+import LoginSubscriber from 'components/subscriber/login/login-subscriber'
+import LoginService from 'services/login'
+import 'pages/style.css';
 
 type Action = 'EDIT' | 'CREATE'
 
@@ -26,22 +27,23 @@ export default class TouchPage extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
 
+        if (!LoginService.isAccountLoggedIn()) {
+            this.state = { redirect: { path: this.props.mainPagePath } }
+            return
+        }
+
         let type: Action
         let data: TournamentInfo
         if (!this.props.location.state) {
             data = new TournamentInfo()
-            data.owner_id = CookiesFun.getSelfID()
+            data.owner_id = LoginService.getSelfID()
             type = 'CREATE'
         } else {
             data = this.props.location.state.data
             type = 'EDIT'
         }
 
-        this.state = {
-            redirect: CookiesFun.isLogged() ? null : { path: this.props.backPagePath },
-            data,
-            type
-        }
+        this.state = { data, type }
     }
 
     private onRedirectToPage = (path: string) => {
@@ -60,7 +62,6 @@ export default class TouchPage extends React.Component<Props, State> {
                 <FadingAnimation>
                     <nav>
                         <PageNavbar
-                            onLogout={() => this.onRedirectToPage(this.props.mainPagePath)}
                             onRouteToPrevPage={() => this.onRedirectToPage(this.props.backPagePath)}>
                         </PageNavbar>
                     </nav>
@@ -76,6 +77,11 @@ export default class TouchPage extends React.Component<Props, State> {
                             onError={err => alert(err)}
                         />
                     </section>
+
+                    <LoginSubscriber
+                        onLogout={() => this.onRedirectToPage(this.props.backPagePath)}
+                        onError={(err) => alert(err)}
+                    />
 
                 </FadingAnimation>
             )

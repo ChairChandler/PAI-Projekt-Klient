@@ -21,7 +21,7 @@ export default class Navbar extends React.Component<any, State> {
         }
     }
 
-    isEqualID = (a, b): boolean => a.length === b.length && a.every((o, i) => o === b[i] || o?.props.id === b[i]?.props.id)
+    private isEqualID = (a, b): boolean => a.length === b.length && a.every((o, i) => o === b[i] || o?.props.id === b[i]?.props.id)
 
     render = () => {
         return <div id="nav">{this.state.children}</div>

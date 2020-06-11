@@ -6,8 +6,9 @@ import { Redirect } from "react-router-dom";
 import FadingAnimation from 'components/fading/fading'
 import { TournamentInfo } from 'models/tournament'
 import server_info from 'config/server.json'
-import * as CookiesFun from 'utils/cookies-functions'
 import MyTournamentsTable, { TableHeaders } from './content/my-tournaments/my-tournaments'
+import LoginSubscriber from 'components/subscriber/login/login-subscriber'
+import LoginService from 'services/login'
 
 type TournamentShortInfo = { id: number, name: string, date: Date }
 
@@ -26,16 +27,15 @@ interface State {
 export default class ManagePage extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
-
+        const isLogged = LoginService.isAccountLoggedIn()
         this.state = {
-            redirect: CookiesFun.isLogged() ? null : { path: this.props.mainPagePath },
-            tableShortData: []
+            tableShortData: [],
+            redirect: isLogged ? null : { path: this.props.mainPagePath }
         }
 
-        if(this.state.redirect) {
-            return
+        if (isLogged) {
+            this.prepareData()
         }
-        this.prepareData()
     }
 
     private retrieveTournamentsList = async (): Promise<TournamentShortInfo[]> => {
@@ -63,7 +63,7 @@ export default class ManagePage extends React.Component<Props, State> {
                 }
             }))
 
-        return info.filter(v => CookiesFun.isPerson(v.owner_id))
+        return info.filter(v => LoginService.isPerson(v.owner_id))
     }
 
     private retrieveContestantTournaments = async (): Promise<TournamentInfo[]> => {
@@ -84,7 +84,7 @@ export default class ManagePage extends React.Component<Props, State> {
     private prepareData = async () => {
         const created = await this.retrieveCreatedTournamentsInformation()
         const activities = await this.retrieveContestantTournaments()
-        
+
         const state = { ...this.state }
         state.data = [...created, ...activities]
 
@@ -95,7 +95,7 @@ export default class ManagePage extends React.Component<Props, State> {
                 id: Number.parseInt(id),
                 name: o.tournament_name,
                 date: o.datetime,
-                take_part: !CookiesFun.isPerson(o.owner_id),
+                take_part: !LoginService.isPerson(o.owner_id),
                 finished: new Date(o.datetime).getTime() < new Date().getTime()
             })
         }
@@ -123,7 +123,6 @@ export default class ManagePage extends React.Component<Props, State> {
                 <FadingAnimation>
                     <nav>
                         <PageNavbar
-                            onLogout={() => this.onRedirectToPage(this.props.mainPagePath)}
                             onRouteToMainPage={() => this.onRedirectToPage(this.props.mainPagePath)}>
                         </PageNavbar>
                     </nav>
@@ -135,6 +134,11 @@ export default class ManagePage extends React.Component<Props, State> {
                         onShow={(id: number) => this.onRedirectToPage(this.props.detailsPagePath, { data: this.state.data[id] })}
                         onEdit={(id: number) => this.onRedirectToPage(this.props.touchPagePath, { data: this.state.data[id] })}
                         onCreate={() => this.onRedirectToPage(this.props.touchPagePath)}
+                    />
+
+                    <LoginSubscriber
+                        onLogout={() => this.onRedirectToPage(this.props.mainPagePath)}
+                        onError={(err) => alert(err)}
                     />
 
                 </FadingAnimation>

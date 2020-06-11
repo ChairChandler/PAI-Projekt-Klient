@@ -161,8 +161,10 @@ export default class EditPanel extends React.Component<Props, State> {
                     min={this.props.data.current_contestants_amount ?? validationInfo.participants_limit.min}
                     defaultValue={this.props.data.participants_limit}
                 />
+            </div>
 
-                <label className="form-check-label">∞</label>
+            <div className="form-group">
+                <label>Infinity</label>
                 <input
                     type="checkbox"
                     id="infinity"

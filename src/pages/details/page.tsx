@@ -7,6 +7,8 @@ import InfoCard from './content/info/info'
 import server_info from 'config/server.json'
 import FadingAnimation from 'components/fading/fading'
 import { TournamentInfo } from 'models/tournament'
+import LoginSubscriber from 'components/subscriber/login/login-subscriber'
+
 
 interface Props {
     mainPagePath: string
@@ -15,11 +17,11 @@ interface Props {
 }
 
 interface State {
-    logged: boolean
     data?: TournamentInfo
     redirectPath?: string
     tournamentID?: number
     backPath?: string
+    loginSubscriber?
 }
 
 export default class DetailsPage extends React.Component<Props, State> {
@@ -28,20 +30,23 @@ export default class DetailsPage extends React.Component<Props, State> {
         super(props)
 
         if (!this.props.location.state) {
-            this.state = { logged: false, redirectPath: this.props.mainPagePath }
+            this.state = { redirectPath: this.props.mainPagePath }
             return
         }
 
         const recvState = this.props.location.state
         if (recvState.data) {
             this.state = {
-                logged: false,
                 data: recvState.data,
-                backPath: this.props.managePagePath
+                backPath: this.props.managePagePath,
+                loginSubscriber:
+                    <LoginSubscriber
+                        onLogout={() => this.onRedirect(this.props.mainPagePath)}
+                        onError={(err) => alert(err)}
+                    />
             }
         } else {
             this.state = {
-                logged: false,
                 tournamentID: recvState.id,
                 backPath: this.props.mainPagePath
             }
@@ -61,24 +66,6 @@ export default class DetailsPage extends React.Component<Props, State> {
         this.setState(state)
     }
 
-    private onLogin = (email: string, tokenMaxAge: number) => {
-        setTimeout(() => {
-            const state = { ...this.state }
-            state.logged = false
-            this.setState(state);
-        }, tokenMaxAge);
-
-        const state = { ...this.state }
-        state.logged = true
-        this.setState(state);
-    }
-
-    private onLogout = () => {
-        const state = { ...this.state }
-        state.logged = false
-        this.setState(state);
-    }
-
     private onRedirect = (path: string) => {
         const state = { ...this.state }
         state.redirectPath = path
@@ -96,8 +83,6 @@ export default class DetailsPage extends React.Component<Props, State> {
                     <nav>
                         <PageNavbar
                             data={this.state.data}
-                            onLogin={this.onLogin}
-                            onLogout={this.onLogout}
                             onBack={() => this.onRedirect(this.state.backPath)}>
                         </PageNavbar>
                     </nav>
@@ -107,6 +92,9 @@ export default class DetailsPage extends React.Component<Props, State> {
                     <section>
                         <InfoCard data={this.state.data} />
                     </section>
+
+                    {this.state.loginSubscriber}
+
                 </FadingAnimation>
             )
         } else {

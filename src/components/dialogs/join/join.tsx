@@ -5,9 +5,9 @@ import 'components/dialogs/style.css';
 
 interface Props {
     tournament_id: number
-    onError: (error) => void
-    onSuccess: () => void
-    onCancel: () => void
+    onError?: (error) => void
+    onSuccess?: () => void
+    onCancel?: () => void
 }
 
 interface State {
@@ -52,9 +52,9 @@ export default class JoinDialog extends React.Component<Props, State> {
             }
 
             this.close()
-            this.props.onSuccess()
+            this.props.onSuccess?.()
         } catch (err) {
-            this.props.onError(err)
+            this.props.onError?.(err)
         }
     }
 
@@ -98,7 +98,7 @@ export default class JoinDialog extends React.Component<Props, State> {
                                 type="button"
                                 className="btn btn-secondary"
                                 value="Cancel"
-                                onClick={() => { this.close(); this.props.onCancel() }}
+                                onClick={() => { this.close(); this.props.onCancel?.() }}
                             />
                         </div>
                     </form>
