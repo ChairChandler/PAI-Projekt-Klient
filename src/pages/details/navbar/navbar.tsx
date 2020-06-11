@@ -7,7 +7,7 @@ import server_info from 'config/server.json';
 import Navbar from 'components/navbar/navbar';
 import { TournamentInfo } from 'models/tournament';
 import LoginSubscriber from 'components/subscriber/login/login-subscriber'
-import LoginService from 'services/login'
+import LoginService from 'services/user/login'
 
 type VisibleDialog = 'login' | 'register' | 'forgotPassword' | 'join'
 type VisibleNavbar = 'unlogged' | 'logged'

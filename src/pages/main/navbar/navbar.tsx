@@ -4,7 +4,7 @@ import RegisterDialog from 'components/dialogs/registration/registration';
 import ForgotPasswd from 'components/dialogs/forgotPasswd/forgotpasswd';
 import Navbar from 'components/navbar/navbar';
 import LoginSubscriber from 'components/subscriber/login/login-subscriber'
-import LoginService from 'services/login'
+import LoginService from 'services/user/login'
 
 type VisibleDialog = 'login' | 'register' | 'forgotPassword'
 type VisibleNavbar = 'unlogged' | 'logged'

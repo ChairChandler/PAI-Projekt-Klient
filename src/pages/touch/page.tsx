@@ -6,7 +6,7 @@ import FadingAnimation from 'components/fading/fading'
 import { TournamentInfo } from 'models/tournament'
 import EditPanel from "./content/edit-panel/edit-panel";
 import LoginSubscriber from 'components/subscriber/login/login-subscriber'
-import LoginService from 'services/login'
+import LoginService from 'services/user/login'
 import * as pages from 'pages/pages'
 import 'pages/style.css';
 

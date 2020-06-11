@@ -1,7 +1,7 @@
 import { Login } from "models/user";
 import React from "react";
 import * as vld from 'validation/user'
-import LoginService from "services/login"
+import LoginService from "services/user/login"
 import 'components/dialogs/style.css';
 
 interface Props {
@@ -16,7 +16,6 @@ interface State {
     email: boolean
   },
   first: boolean
-  show: boolean
 }
 
 export default class LoginDialog extends React.Component<Props, State> {
@@ -32,8 +31,7 @@ export default class LoginDialog extends React.Component<Props, State> {
       inputsValidation: {
         email: true
       },
-      first: true,
-      show: true
+      first: true
     }
   }
 
@@ -60,13 +58,12 @@ export default class LoginDialog extends React.Component<Props, State> {
 
     if (validated) {
       const user = new Login(email, password);
-      const {isLogged, error} = await LoginService.login(user)
-      if(isLogged) {
-        this.close()
+      const { isLogged, error } = await LoginService.login(user)
+      if (isLogged) {
         this.props.onSuccess?.()
       }
 
-      if(error) {
+      if (error) {
         this.props.onError?.(error)
       }
     }
@@ -82,75 +79,67 @@ export default class LoginDialog extends React.Component<Props, State> {
     }
   }
 
-  private close = () => {
-    this.setState({ ...this.state, show: false })
-  }
-
   render = () => {
-    if (this.state.show) {
-      return (
-        <div className="container">
-          <form className="dialog-form" onSubmit={this.onSubmit}>
-            <div className="form-group">
+    return (
+      <div className="container">
+        <form className="dialog-form" onSubmit={this.onSubmit}>
+          <div className="form-group">
 
-              <label className="form-check-label">E-mail</label>
-              <input
-                type="email"
-                name="email"
-                placeholder="name@example.com"
-                className="form-control"
-                ref={r => this.inputsRef["email"] = r}
-              />
-              {!this.state.inputsValidation["email"] && (
-                <div className="invalid-feedback">Wrong e-mail</div>
-              )}
-            </div>
+            <label className="form-check-label">E-mail</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="name@example.com"
+              className="form-control"
+              ref={r => this.inputsRef["email"] = r}
+            />
+            {!this.state.inputsValidation["email"] && (
+              <div className="invalid-feedback">Wrong e-mail</div>
+            )}
+          </div>
 
 
-            <div className="form-group">
-              <label className="form-check-label">Password</label>
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                className="form-control"
-                ref={r => this.inputsRef["password"] = r}
-              />
-              {!this.state.inputsValidation["password"] && (
-                <div className="invalid-feedback">Wrong password</div>
-              )}
-              <small className="form-text text-muted">
-                Your password must be 8-16 characters long.
+          <div className="form-group">
+            <label className="form-check-label">Password</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className="form-control"
+              ref={r => this.inputsRef["password"] = r}
+            />
+            {!this.state.inputsValidation["password"] && (
+              <div className="invalid-feedback">Wrong password</div>
+            )}
+            <small className="form-text text-muted">
+              Your password must be 8-16 characters long.
               </small>
-            </div>
+          </div>
 
-            <div className="flex">
-              <input
-                type="submit"
-                className="btn btn-primary"
-                value="Sign In"
-                id="submit"
-              />
+          <div className="flex">
+            <input
+              type="submit"
+              className="btn btn-primary"
+              value="Sign In"
+              id="submit"
+            />
 
-              <input
-                type="button"
-                className="btn btn-secondary"
-                value="Forgot password"
-                onClick={() => { this.close(); this.props.onForgotPassword?.() }}
-              />
+            <input
+              type="button"
+              className="btn btn-secondary"
+              value="Forgot password"
+              onClick={this.props.onForgotPassword}
+            />
 
-              <input
-                type="button"
-                className="btn btn-secondary"
-                value="Cancel"
-                onClick={() => { this.close(); this.props.onCancel?.() }}
-              />
-            </div>
-          </form>
-        </div>
-      );
-    } else {
-      return null
-    }
+            <input
+              type="button"
+              className="btn btn-secondary"
+              value="Cancel"
+              onClick={this.props.onCancel}
+            />
+          </div>
+        </form>
+      </div>
+    );
   }
 }

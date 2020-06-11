@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from 'components/navbar/navbar';
-import LoginService from 'services/login'
+import LoginService from 'services/user/login'
 
 interface Props {
     onRouteToMainPage: () => void

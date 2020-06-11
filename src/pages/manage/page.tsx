@@ -8,7 +8,7 @@ import { TournamentInfo } from 'models/tournament'
 import server_info from 'config/server.json'
 import MyTournamentsTable, { TableHeaders } from './content/my-tournaments/my-tournaments'
 import LoginSubscriber from 'components/subscriber/login/login-subscriber'
-import LoginService from 'services/login'
+import LoginService from 'services/user/login'
 import * as pages from 'pages/pages'
 
 
