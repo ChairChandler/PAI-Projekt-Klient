@@ -10,9 +10,9 @@ import './style.css';
 
 interface Props {
     data: TournamentInfo
-    onCancel: () => void
-    onSuccess: () => void
-    onError: (err) => void
+    onCancel?: () => void
+    onSuccess?: () => void
+    onError?: (err) => void
     action: 'CREATE' | 'EDIT'
 }
 

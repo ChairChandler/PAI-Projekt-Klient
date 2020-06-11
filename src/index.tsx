@@ -5,9 +5,9 @@ import MainPage from 'pages/main/page';
 import * as serviceWorker from './serviceWorker';
 import { Switch, Route, Redirect, BrowserRouter } from 'react-router-dom';
 import DetailsPage from 'pages/details/page';
-import routing_info from 'config/routing.json';
 import ManagePage from 'pages/manage/page'
 import TouchPage from 'pages/touch/page';
+import routing_info from 'config/routing.json';
 
 
 ReactDOM.render(
@@ -15,28 +15,20 @@ ReactDOM.render(
     <BrowserRouter>
       <Switch>
         <Route exact path={routing_info.main}>
-          <MainPage detailsPagePath={routing_info.details} managePagePath={routing_info.manage} />
+          <MainPage />
         </Route>
 
         <Route exact path={routing_info.details} render={props =>
-          <DetailsPage {...props}
-            mainPagePath={routing_info.main}
-            managePagePath={routing_info.manage}
-          />} />
+          <DetailsPage {...props} />
+        } />
 
         <Route exact path={routing_info.manage}>
-          <ManagePage
-            mainPagePath={routing_info.main}
-            detailsPagePath={routing_info.details}
-            touchPagePath={routing_info.touch}
-          />
+          <ManagePage />
         </Route>
 
         <Route exact path={routing_info.touch} render={props =>
-          <TouchPage {...props}
-            backPagePath={routing_info.manage}
-            mainPagePath={routing_info.main}
-          />} />
+          <TouchPage {...props} />
+        } />
 
         <Redirect to={routing_info.main}></Redirect>
       </Switch>

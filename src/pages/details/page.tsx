@@ -8,17 +8,16 @@ import server_info from 'config/server.json'
 import FadingAnimation from 'components/fading/fading'
 import { TournamentInfo } from 'models/tournament'
 import LoginSubscriber from 'components/subscriber/login/login-subscriber'
+import * as pages from 'pages/pages'
 
 
 interface Props {
-    mainPagePath: string
-    managePagePath: string
     location
 }
 
 interface State {
     data?: TournamentInfo
-    redirectPath?: string
+    redirect?: { path: string, data?}
     tournamentID?: number
     backPath?: string
     loginSubscriber?
@@ -30,27 +29,50 @@ export default class DetailsPage extends React.Component<Props, State> {
         super(props)
 
         if (!this.props.location.state) {
-            this.state = { redirectPath: this.props.mainPagePath }
+            this.state = { redirect: { path: pages.mainPagePath } }
             return
         }
 
         const recvState = this.props.location.state
-        if (recvState.data) {
-            this.state = {
-                data: recvState.data,
-                backPath: this.props.managePagePath,
-                loginSubscriber:
-                    <LoginSubscriber
-                        onLogout={() => this.onRedirect(this.props.mainPagePath)}
-                        onError={(err) => alert(err)}
-                    />
-            }
-        } else {
-            this.state = {
-                tournamentID: recvState.id,
-                backPath: this.props.mainPagePath
-            }
-            this.retrieveTournamentInformation()
+
+        switch (recvState.src) {
+            case pages.managePagePath:
+
+                this.state = {
+                    data: recvState.data,
+                    backPath: pages.managePagePath,
+                    loginSubscriber:
+                        <LoginSubscriber
+                            onLogout={() => this.onRedirect(pages.mainPagePath)}
+                            onError={(err) => alert(err)}
+                        />
+                }
+
+                break
+
+            case pages.mainPagePath:
+
+                this.state = {
+                    tournamentID: recvState.id,
+                    backPath: pages.mainPagePath
+                }
+                this.retrieveTournamentInformation()
+
+                break
+
+            case pages.touchPagePath:
+
+                this.state = {
+                    data: recvState.data,
+                    backPath: pages.touchPagePath,
+                    loginSubscriber:
+                        <LoginSubscriber
+                            onLogout={() => this.onRedirect(pages.mainPagePath)}
+                            onError={(err) => alert(err)}
+                        />
+                }
+
+                break
         }
     }
 
@@ -66,15 +88,25 @@ export default class DetailsPage extends React.Component<Props, State> {
         this.setState(state)
     }
 
-    private onRedirect = (path: string) => {
+    private onRedirect = (path: string, data = {}) => {
         const state = { ...this.state }
-        state.redirectPath = path
+        const cp = { ...data }
+
+        cp["src"] = pages.detailsPagePath
+        if (path === pages.touchPagePath) {
+            cp["data"] = this.state.data
+        }
+
+        state.redirect = { path, data: cp }
         this.setState(state)
     }
 
     render = () => {
-        if (this.state.redirectPath) {
-            return <Redirect to={this.state.redirectPath}></Redirect>
+        if (this.state.redirect) {
+            return <Redirect to={{
+                pathname: this.state.redirect.path,
+                state: this.state.redirect.data
+            }}></Redirect>
         }
 
         if (this.state.data) {
@@ -83,6 +115,7 @@ export default class DetailsPage extends React.Component<Props, State> {
                     <nav>
                         <PageNavbar
                             data={this.state.data}
+                            onModify={() => this.onRedirect(pages.touchPagePath, { data: this.state.data })}
                             onBack={() => this.onRedirect(this.state.backPath)}>
                         </PageNavbar>
                     </nav>

@@ -7,20 +7,20 @@ import { TournamentInfo } from 'models/tournament'
 import EditPanel from "./content/edit-panel/edit-panel";
 import LoginSubscriber from 'components/subscriber/login/login-subscriber'
 import LoginService from 'services/login'
+import * as pages from 'pages/pages'
 import 'pages/style.css';
 
 type Action = 'EDIT' | 'CREATE'
 
 interface Props {
-    backPagePath: string
-    mainPagePath: string
     location
 }
 
 interface State {
-    redirect?: { path: string }
+    redirect?: { path: string, data?}
     data?: TournamentInfo
-    type?: Action
+    action?: Action
+    backPagePath?: string
 }
 
 export default class TouchPage extends React.Component<Props, State> {
@@ -28,58 +28,66 @@ export default class TouchPage extends React.Component<Props, State> {
         super(props)
 
         if (!LoginService.isAccountLoggedIn()) {
-            this.state = { redirect: { path: this.props.mainPagePath } }
+            this.state = { redirect: { path: pages.mainPagePath } }
             return
         }
 
-        let type: Action
-        let data: TournamentInfo
-        if (!this.props.location.state) {
+        let action: Action, data: TournamentInfo
+        if (!this.props.location.data) {
             data = new TournamentInfo()
             data.owner_id = LoginService.getSelfID()
-            type = 'CREATE'
+            action = 'CREATE'
         } else {
             data = this.props.location.state.data
-            type = 'EDIT'
+            action = 'EDIT'
         }
 
-        this.state = { data, type }
+        const backPagePath = this.props.location.state.src
+        this.state = { data, action, backPagePath }
     }
 
-    private onRedirectToPage = (path: string) => {
+    private onRedirectToPage = (path: string, data = {}) => {
         const state = { ...this.state }
-        state.redirect = { path }
+        const cp = { ...data }
+
+        if (path === pages.detailsPagePath) {
+            cp["data"] = this.state.data
+            cp["src"] = pages.touchPagePath
+        }
+        
+        state.redirect = { path, data: cp }
         this.setState(state)
     }
 
     render = () => {
         if (this.state.redirect) {
-            return <Redirect to={this.state.redirect.path}></Redirect>
+            return <Redirect to={{
+                pathname: this.state.redirect.path,
+                state: this.state.redirect.data
+            }}></Redirect>
         }
 
         if (this.state.data) {
             return (
                 <FadingAnimation>
                     <nav>
-                        <PageNavbar
-                            onRouteToPrevPage={() => this.onRedirectToPage(this.props.backPagePath)}>
-                        </PageNavbar>
+                        <PageNavbar />
                     </nav>
 
-                    <Logo type={this.state.type} />
+                    <Logo type={this.state.action} />
 
                     <section>
                         <EditPanel
                             data={this.state.data}
-                            action={this.state.type}
-                            onSuccess={() => this.onRedirectToPage(this.props.backPagePath)}
-                            onCancel={() => this.onRedirectToPage(this.props.backPagePath)}
+                            action={this.state.action}
+                            onSuccess={() => this.onRedirectToPage(this.state.backPagePath)}
+                            onCancel={() => this.onRedirectToPage(this.state.backPagePath)}
                             onError={err => alert(err)}
                         />
                     </section>
 
                     <LoginSubscriber
-                        onLogout={() => this.onRedirectToPage(this.props.backPagePath)}
+                        onLogout={() => this.onRedirectToPage(pages.mainPagePath)}
                         onError={(err) => alert(err)}
                     />
 

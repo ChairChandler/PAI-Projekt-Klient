@@ -9,14 +9,10 @@ import server_info from 'config/server.json'
 import MyTournamentsTable, { TableHeaders } from './content/my-tournaments/my-tournaments'
 import LoginSubscriber from 'components/subscriber/login/login-subscriber'
 import LoginService from 'services/login'
+import * as pages from 'pages/pages'
+
 
 type TournamentShortInfo = { id: number, name: string, date: Date }
-
-interface Props {
-    mainPagePath: string
-    detailsPagePath: string
-    touchPagePath: string //touch = create or modify
-}
 
 interface State {
     redirect?: { path: string, data?: any }
@@ -24,13 +20,13 @@ interface State {
     tableShortData: TableHeaders[]
 }
 
-export default class ManagePage extends React.Component<Props, State> {
-    constructor(props: Props) {
+export default class ManagePage extends React.Component<{}, State> {
+    constructor(props) {
         super(props)
         const isLogged = LoginService.isAccountLoggedIn()
         this.state = {
             tableShortData: [],
-            redirect: isLogged ? null : { path: this.props.mainPagePath }
+            redirect: isLogged ? null : { path: pages.mainPagePath }
         }
 
         if (isLogged) {
@@ -104,9 +100,11 @@ export default class ManagePage extends React.Component<Props, State> {
         this.setState(state)
     }
 
-    private onRedirectToPage = (path: string, data?: any) => {
+    private onRedirectToPage = (path: string, data = {}) => {
         const state = { ...this.state }
-        state.redirect = { path, data }
+        const cp = data
+        cp["src"] = pages.managePagePath
+        state.redirect = { path, data: cp }
         this.setState(state)
     }
 
@@ -123,7 +121,7 @@ export default class ManagePage extends React.Component<Props, State> {
                 <FadingAnimation>
                     <nav>
                         <PageNavbar
-                            onRouteToMainPage={() => this.onRedirectToPage(this.props.mainPagePath)}>
+                            onRouteToMainPage={() => this.onRedirectToPage(pages.mainPagePath)}>
                         </PageNavbar>
                     </nav>
 
@@ -131,13 +129,13 @@ export default class ManagePage extends React.Component<Props, State> {
 
                     <MyTournamentsTable
                         data={this.state.tableShortData}
-                        onShow={(id: number) => this.onRedirectToPage(this.props.detailsPagePath, { data: this.state.data[id] })}
-                        onEdit={(id: number) => this.onRedirectToPage(this.props.touchPagePath, { data: this.state.data[id] })}
-                        onCreate={() => this.onRedirectToPage(this.props.touchPagePath)}
+                        onShow={(id: number) => this.onRedirectToPage(pages.detailsPagePath, { data: this.state.data[id] })}
+                        onEdit={(id: number) => this.onRedirectToPage(pages.touchPagePath, { data: this.state.data[id] })}
+                        onCreate={() => this.onRedirectToPage(pages.touchPagePath)}
                     />
 
                     <LoginSubscriber
-                        onLogout={() => this.onRedirectToPage(this.props.mainPagePath)}
+                        onLogout={() => this.onRedirectToPage(pages.mainPagePath)}
                         onError={(err) => alert(err)}
                     />
 

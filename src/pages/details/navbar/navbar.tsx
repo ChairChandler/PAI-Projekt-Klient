@@ -14,7 +14,8 @@ type VisibleNavbar = 'unlogged' | 'logged'
 
 interface Props {
     data: TournamentInfo
-    onBack: () => void
+    onBack?: () => void
+    onModify?: () => void
 }
 
 interface State {
@@ -123,7 +124,7 @@ export default class PageNavbar extends React.Component<Props, State> {
                         <button className='btn btn-primary' id="logout" onClick={this.onLogoutButtonClicked}>Logout</button>
                         {
                             this.state.isOwner ?
-                                <button className='btn btn-primary' id="modify" onClick={() => alert('not implemented')}>Modify</button>
+                                <button className='btn btn-primary' id="modify" onClick={this.props.onModify}>Modify</button>
                                 :
                                 isMaxParticipants || this.state.taking_part_in_tournament ?
                                     null
