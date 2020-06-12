@@ -17,7 +17,7 @@ export default class MyTournamentsTable extends React.Component<Props, {}> {
     private HEADERS = [
         { title: 'ID', field: 'id', hidden: true },
         { title: 'Name', field: 'name' },
-        { title: 'Date', field: 'date' },
+        { title: 'Date', field: 'date' }
     ]
 
     render = () => {

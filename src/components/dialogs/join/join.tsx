@@ -1,7 +1,7 @@
 import { ContestantInfo } from "models/tournament";
 import React from "react";
 import 'components/dialogs/style.css';
-import JoinTournamentService from 'services/contestant/join-tournament'
+import ContestantService from 'services/contestant/contestant'
 
 interface Props {
     tournament_id: number
@@ -23,7 +23,7 @@ export default class JoinDialog extends React.Component<Props, {}> {
         const ranking = this.inputsRef.ranking_no.value;
 
         const user = new ContestantInfo(this.props.tournament_id, license, ranking);
-        const { error } = await JoinTournamentService.join(user)
+        const { error } = await ContestantService.join(user)
         if (error) {
             this.props.onError?.(error)
         } else {

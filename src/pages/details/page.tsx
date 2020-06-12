@@ -4,12 +4,11 @@ import Logo from './logo/logo'
 import 'pages/style.css';
 import { Redirect } from "react-router-dom";
 import InfoCard from './content/info/info'
-import server_info from 'config/server.json'
 import FadingAnimation from 'components/fading/fading'
 import { TournamentInfo } from 'models/tournament'
 import LoginSubscriber from 'components/subscriber/login/login-subscriber'
 import * as pages from 'pages/pages'
-
+import TournamentService from 'services/tournament/tournament'
 
 interface Props {
     location
@@ -77,15 +76,14 @@ export default class DetailsPage extends React.Component<Props, State> {
     }
 
     private retrieveTournamentInformation = async () => {
-        const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/info?tournament_id=${this.state.tournamentID}`)
-        if (!data.ok) {
-            console.warn('Failed to retrieve tourament informations')
+        const { error, data } = await TournamentService.retrieveTournamentInformation(this.state.tournamentID)
+        if (error) {
+            alert(error)
+        } else {
+            const state = { ...this.state }
+            state.data = data
+            this.setState(state)
         }
-
-        const info: TournamentInfo = await data.json()
-        const state = { ...this.state }
-        state.data = info
-        this.setState(state)
     }
 
     private onRedirect = (path: string, data = {}) => {

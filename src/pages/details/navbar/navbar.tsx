@@ -3,11 +3,11 @@ import LoginDialog from 'components/dialogs/login/login';
 import RegisterDialog from 'components/dialogs/registration/registration';
 import ForgotPasswd from 'components/dialogs/forgotPasswd/forgotpasswd';
 import JoinDialog from 'components/dialogs/join/join';
-import server_info from 'config/server.json';
 import Navbar from 'components/navbar/navbar';
 import { TournamentInfo } from 'models/tournament';
 import LoginSubscriber from 'components/subscriber/login/login-subscriber'
 import LoginService from 'services/user/login'
+import ContestantService from 'services/contestant/contestant'
 
 type VisibleDialog = 'login' | 'register' | 'forgotPassword' | 'join'
 type VisibleNavbar = 'unlogged' | 'logged'
@@ -29,7 +29,6 @@ export default class PageNavbar extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
         this.state = {
-            showDialog: null,
             visibleNavbar: LoginService.isAccountLoggedIn() ? 'logged' : 'unlogged'
         }
 
@@ -43,7 +42,15 @@ export default class PageNavbar extends React.Component<Props, State> {
         this.state = state
 
         if (!this.state.isOwner && this.state.visibleNavbar === 'logged') {
-            await this.checkIsTakingPart()
+            const id = this.props.data.tournament_id
+            const { error, contestant } = await ContestantService.isContestant(id)
+            if (error) {
+                alert(error)
+            } else if (this.state.taking_part_in_tournament !== contestant) {
+                const state = { ...this.state }
+                state.taking_part_in_tournament = contestant
+                this.setState(state)
+            }
         }
     }
 
@@ -70,30 +77,6 @@ export default class PageNavbar extends React.Component<Props, State> {
         const state = { ...this.state }
         state.showDialog = null
         this.setState(state)
-    }
-
-    private checkIsTakingPart = async () => {
-        try {
-            const id = this.props.data.tournament_id
-            const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/contestants?tournament_id=${id}`, {
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' }
-            })
-
-            if (!data.ok) {
-                throw Error(await data.text())
-            }
-
-            const json = await data.json()
-            if (this.state.taking_part_in_tournament !== json.taking_part) {
-                const state = { ...this.state }
-                state.taking_part_in_tournament = json.taking_part
-                this.setState(state)
-            }
-        } catch (err) {
-            alert(err.message)
-            return false
-        }
     }
 
     render = () => {

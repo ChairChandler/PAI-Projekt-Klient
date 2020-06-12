@@ -5,14 +5,12 @@ import 'pages/style.css';
 import { Redirect } from "react-router-dom";
 import FadingAnimation from 'components/fading/fading'
 import { TournamentInfo } from 'models/tournament'
-import server_info from 'config/server.json'
 import MyTournamentsTable, { TableHeaders } from './content/my-tournaments/my-tournaments'
 import LoginSubscriber from 'components/subscriber/login/login-subscriber'
 import LoginService from 'services/user/login'
 import * as pages from 'pages/pages'
-
-
-type TournamentShortInfo = { id: number, name: string, date: Date }
+import TournamentService from 'services/tournament/tournament'
+import ContestantService from 'services/contestant/contestant'
 
 interface State {
     redirect?: { path: string, data?: any }
@@ -34,70 +32,51 @@ export default class ManagePage extends React.Component<{}, State> {
         }
     }
 
-    private retrieveTournamentsList = async (): Promise<TournamentShortInfo[]> => {
-        const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/list/general`)
-        if (!data.ok) {
-            console.warn('Failed to retrieve touraments list')
-        }
-
-        return data.json()
-    }
-
     private retrieveCreatedTournamentsInformation = async (): Promise<TournamentInfo[]> => {
-        const list = await this.retrieveTournamentsList()
+        const { error, data } = await TournamentService.retrieveClosestTournaments()
+        if (error) {
+            alert(error)
+        } else {
 
-        const info = await Promise.all(
-            list.map(async (v): Promise<TournamentInfo> => {
-                try {
-                    const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/info?tournament_id=${v.id}`)
-                    if (!data.ok) {
-                        throw Error('Failed to retrieve tourament informations')
+            const info = await Promise.all(
+                data.map(async (v): Promise<TournamentInfo> => {
+                    const { error, data } = await TournamentService.retrieveTournamentInformation(v.id)
+                    if (error) {
+                        alert(error)
+                    } else {
+                        return data
                     }
-                    return await data.json()
-                } catch (err) {
-                    console.error(err)
-                }
-            }))
+                }))
 
-        return info.filter(v => LoginService.isPerson(v.owner_id))
-    }
-
-    private retrieveContestantTournaments = async (): Promise<TournamentInfo[]> => {
-        try {
-            const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/list/contestant`, {
-                credentials: 'include'
-            })
-            if (!data.ok) {
-                new Error('Failed to retrieve contestant touraments list')
-            }
-
-            return data.json()
-        } catch (err) {
-            console.error(err)
+            return info.filter(v => LoginService.isPerson(v.owner_id))
         }
     }
 
     private prepareData = async () => {
         const created = await this.retrieveCreatedTournamentsInformation()
-        const activities = await this.retrieveContestantTournaments()
+        const { error, data } = await ContestantService.retrieveContestantTournaments()
+        if (error) {
+            alert(error)
+        } else {
 
-        const state = { ...this.state }
-        state.data = [...created, ...activities]
+            const state = { ...this.state }
+            state.data = [...created, ...data]
 
-        const tmp: TableHeaders[] = []
-        for (const id in state.data) {
-            const o = state.data[id];
-            tmp.push({
-                id: Number.parseInt(id),
-                name: o.tournament_name,
-                date: o.datetime,
-                take_part: !LoginService.isPerson(o.owner_id),
-                finished: new Date(o.datetime).getTime() < new Date().getTime()
-            })
+            const tmp: TableHeaders[] = []
+            for (const id in state.data) {
+                const o = state.data[id];
+                tmp.push({
+                    id: Number.parseInt(id),
+                    name: o.tournament_name,
+                    date: o.datetime,
+                    take_part: !LoginService.isPerson(o.owner_id),
+                    finished: new Date(o.datetime).getTime() < new Date().getTime()
+                })
+            }
+
+            state.tableShortData = tmp
+            this.setState(state)
         }
-
-        state.tableShortData = tmp
-        this.setState(state)
     }
 
     private onRedirectToPage = (path: string, data = {}) => {

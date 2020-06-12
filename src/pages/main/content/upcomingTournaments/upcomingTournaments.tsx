@@ -1,15 +1,13 @@
 import React from "react";
 import MaterialTable from "material-table";
-import server_info from 'config/server.json'
-
-type TableHeaders = { id: number, name: string, date: Date }
+import TournamentService, { TournamentShortInfo } from 'services/tournament/tournament'
 
 interface Props {
-    onTournamentClick: (id: number) => void
+    onTournamentClick?: (id: number) => void
 }
 
 interface State {
-    data: TableHeaders[]
+    data: TournamentShortInfo[]
 }
 
 export default class UpcomingTournamentsTable extends React.Component<Props, State> {
@@ -41,14 +39,11 @@ export default class UpcomingTournamentsTable extends React.Component<Props, Sta
     }
 
     private retrieveData = async () => {
-        const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/list/general`)
-        if (!data.ok) {
-            console.warn('Failed to retrieve upcoming tournaments')
-        }
-
-        const rows: TableHeaders[] = await data.json()
-        if (this.state.data.toString() !== rows.toString()) {
-            this.setState({ data: rows })
+        const { error, data } = await TournamentService.retrieveClosestTournaments()
+        if (error) {
+            alert(error)
+        } else if (this.state.data.toString() !== data.toString()) {
+            this.setState({ data })
         }
     }
 

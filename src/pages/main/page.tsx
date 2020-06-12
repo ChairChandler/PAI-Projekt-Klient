@@ -19,7 +19,6 @@ export default class MainPage extends React.Component<{}, State> {
     super(props)
     this.state = {}
   }
-
   private onRedirect = (path: string, data = {}) => {
     const state = { ...this.state }
     const cp = data
