@@ -2,9 +2,9 @@ import React from 'react';
 import { TournamentInfo } from 'models/tournament'
 import { Loader } from 'google-maps';
 import validationInfo from 'config/validation.json';
-import server_info from 'config/server.json'
 import * as vld from 'validation/tournament'
 import { getOnlyDateString } from 'utils/date'
+import TournamentService from 'services/tournament/tournament'
 import './style.css';
 
 
@@ -12,7 +12,7 @@ interface Props {
     data: TournamentInfo
     onCancel?: () => void
     onSuccess?: () => void
-    onError?: (err) => void
+    onError?: (err: string) => void
     action: 'CREATE' | 'EDIT'
 }
 
@@ -57,7 +57,7 @@ export default class EditPanel extends React.Component<Props, State> {
     }
 
     private onSubmit = async (event) => {
-        event.preventDefault();
+        event.preventDefault()
 
         const name = $('#name')
         const description = $('#description')
@@ -92,26 +92,12 @@ export default class EditPanel extends React.Component<Props, State> {
             payload.localization_lng = 0
             payload.logos = []
 
-            await this.sendTournamentInfo(payload, this.props.action)
-        }
-    }
-
-    private sendTournamentInfo = async (payload: TournamentInfo, action: 'CREATE' | 'EDIT') => {
-        try {
-            const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/info`, {
-                method: action === 'CREATE' ? 'POST' : 'PUT',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-
-            if (!data.ok) {
-                throw Error(await data.text())
+            const { error } = await TournamentService.modifyOrCreateTournamentInfo(payload, this.props.action)
+            if(error) {
+                this.props.onError(error)
+            } else {
+                this.props.onSuccess()
             }
-
-            this.props.onSuccess()
-        } catch (err) {
-            this.props.onError(err)
         }
     }
 

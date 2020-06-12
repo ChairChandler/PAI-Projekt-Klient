@@ -12,6 +12,8 @@ class ResetPasswordService {
             if (!data.ok) {
                 return { error: await data.text() }
             }
+
+            return {}
         } catch (err) {
             return { error: err.message }
         }

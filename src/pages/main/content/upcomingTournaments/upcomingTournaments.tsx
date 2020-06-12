@@ -26,8 +26,6 @@ export default class UpcomingTournamentsTable extends React.Component<Props, Sta
         }
 
         this.retrieveData()
-        const ms = this.INTERVAL_TIME_SEC * 1000
-        setInterval(() => this.retrieveData(), ms)
     }
 
     componentDidMount = () => {
@@ -41,10 +39,13 @@ export default class UpcomingTournamentsTable extends React.Component<Props, Sta
     private retrieveData = async () => {
         const { error, data } = await TournamentService.retrieveClosestTournaments()
         if (error) {
-            alert(error)
+            console.error(error)
         } else if (this.state.data.toString() !== data.toString()) {
             this.setState({ data })
         }
+
+        const ms = this.INTERVAL_TIME_SEC * 1000
+        setTimeout(() => this.retrieveData(), ms)
     }
 
     render = () => {

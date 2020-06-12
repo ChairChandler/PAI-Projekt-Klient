@@ -3,6 +3,8 @@ import { Login } from 'models/user'
 import Cookies from 'js-cookie'
 import Schedule from 'node-schedule'
 import Subject from 'utils/subject'
+import PublicKeyService from 'services/public-key/public-key'
+import encrypt from 'utils/encrypt'
 
 export type LoginSubject = { error?: string, isLogged?: boolean }
 
@@ -33,6 +35,9 @@ class LoginService {
     login = async (credentials: Login): Promise<LoginSubject> => {
         let res: LoginSubject
         try {
+            const publicKey = await PublicKeyService.getPublicKey()
+            credentials.password =  encrypt(credentials.password, publicKey)
+            
             const data = await fetch(`http://${server_info.ip}:${server_info.port}/user/login`, {
                 method: 'POST',
                 credentials: 'include',

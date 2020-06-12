@@ -29,6 +29,25 @@ class TournamentService {
             return { error: err.message }
         }
     }
+
+    modifyOrCreateTournamentInfo = async (payload: TournamentInfo, action: 'CREATE' | 'EDIT'): Promise<{ error?: string }> => {
+        try {
+            const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/info`, {
+                method: action === 'CREATE' ? 'POST' : 'PUT',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+
+            if (!data.ok) {
+                return { error: await data.text() }
+            }
+
+            return {}
+        } catch (err) {
+            return { error: err.message }
+        }
+    }
 }
 
 export default new TournamentService()
