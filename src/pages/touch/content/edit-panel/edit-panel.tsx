@@ -18,6 +18,7 @@ interface Props {
 
 interface State {
     logos?: { id: number, data: string }[]
+    marker?: google.maps.Marker
 }
 
 export default class EditPanel extends React.Component<Props, State> {
@@ -27,10 +28,11 @@ export default class EditPanel extends React.Component<Props, State> {
     }
 
     componentDidMount = async () => {
-        await Promise.all([this.initGoogleMap(), this.initLogos()])
+        const [marker, logos] = await Promise.all([this.initGoogleMap(), this.initLogos()])
+        this.setState({ marker, logos })
     }
 
-    private initGoogleMap = async () => {
+    private initGoogleMap = async (): Promise<google.maps.Marker> => {
         const center = {
             lat: this.props.data?.localization_lat ?? 0,
             lng: this.props.data?.localization_lng ?? 0
@@ -39,10 +41,12 @@ export default class EditPanel extends React.Component<Props, State> {
         const mapElement = $(`#map`)[0]
         const google = await new Loader().load();
         const map = new google.maps.Map(mapElement, mapInfo);
-        new google.maps.Marker({ position: center, map })
+        const marker = new google.maps.Marker({ position: center, map, draggable: true })
+
+        return marker
     }
 
-    private initLogos = async () => {
+    private initLogos = async (): Promise<{ id: number, data: string }[]> => {
         const data = this.props.data.logos?.map(({ id, data }) => {
 
             const buffer = Buffer.from(data["data"])
@@ -51,9 +55,21 @@ export default class EditPanel extends React.Component<Props, State> {
             return { id, data: dataUrl }
         })
 
-        const state = { ...this.state }
-        state.logos = data
-        this.state = state
+        return data
+    }
+
+    componentDidUpdate = () => {
+        // set cross position to img position, 10% of img width, height
+        const factor = 0.1
+        
+        this.state.logos?.forEach(({id}) => {
+            const cross = $(`logo-cross-remove-${id}`)
+            const img = cross.next('img')
+            const { left, top } = img.position()
+            const [width, height] = [factor * img.width(), factor * img.height()]
+
+            cross.css({left, top, width, height})
+        })
     }
 
     private onSubmit = async (event) => {
@@ -64,6 +80,7 @@ export default class EditPanel extends React.Component<Props, State> {
         const date = $('#date')
         const limit = $('#limit')
         const deadline = $('#deadline')
+        const position = this.state.marker.getPosition().toJSON()
 
         const nameVal = name.val() as string
         const descriptionVal = description.val() as string
@@ -88,17 +105,24 @@ export default class EditPanel extends React.Component<Props, State> {
             payload.datetime = dateVal
             payload.joining_deadline = deadlineVal
             payload.participants_limit = limitVal
-            payload.localization_lat = 0
-            payload.localization_lng = 0
-            payload.logos = []
+            payload.localization_lat = position.lat
+            payload.localization_lng = position.lng
+            payload.logos = await Promise.all(this.state.logos.map(
+                ({ id, data }) => ({ id, data: new Blob([data], { type: 'contentType' }) })))
 
             const { error } = await TournamentService.modifyOrCreateTournamentInfo(payload, this.props.action)
-            if(error) {
+            if (error) {
                 this.props.onError(error)
             } else {
                 this.props.onSuccess()
             }
         }
+    }
+
+    private removeLogo = (id: number) => {
+        const index = this.state.logos.findIndex(v => v.id === id)
+        this.state.logos.splice(index)
+        this.setState(this.state)
     }
 
     render = () => {
@@ -170,6 +194,21 @@ export default class EditPanel extends React.Component<Props, State> {
 
             <div id="map" />
 
+            {this.state.logos?.length > 0 &&
+                <h1>Sponsors</h1> &&
+                <div id="tournament-container-logo" className="container-cols">
+                    {
+                        this.state.logos.map(({ id, data }) =>
+                            <>
+                                <div id={`logo-cross-remove-${id}`} onClick={() => this.removeLogo(id)}>
+                                    &times;
+                                </div>
+                                <img className="tournament-logo" src={data} alt={`logo_${id}`} />
+                            </>)
+                    }
+                </div>
+            }
+
             <div className="flex">
                 <input
                     type="submit"
@@ -188,15 +227,3 @@ export default class EditPanel extends React.Component<Props, State> {
         </form>
     }
 }
-
-/*
-{this.state.logos?.length > 0 &&
-                <h1>Sponsors</h1> &&
-                <div id="tournament-container-logo" className="container-cols">
-                    {
-                        this.state.logos.map(({ id, data }) =>
-                            <img className="tournament-logo" src={data} alt={`logo_${id}`}></img>)
-                    }
-                </div>
-            }
-            */

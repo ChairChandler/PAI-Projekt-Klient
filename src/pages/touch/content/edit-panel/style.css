@@ -13,3 +13,8 @@
     padding: 2%;
     padding-bottom: 2%;
 }
+
+.container-rows {
+    display: flex;
+    flex-direction: column;
+}
