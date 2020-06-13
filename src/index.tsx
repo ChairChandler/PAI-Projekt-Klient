@@ -10,28 +10,30 @@ import TouchPage from 'pages/touch/page';
 import routing_info from 'config/routing.json';
 import isServerAvailable from 'utils/server-status'
 
-const root = document.getElementById('root')
+(() => {
+  const server_error = document.getElementById('server-error')
+  renderPage()
+  let server_unavailable = false
 
-isServerAvailable()
-  .then(async () => {
-    if (!await isServerAvailable()) {
-      ReactDOM.render(<h1>Server not available</h1>, root)
-    } else {
-      renderPage()
-    }
-  })
-  .then(() => {
-    let loadPage = true, server_unavailable = false
-    setInterval(async () => {
-      if (!await isServerAvailable()) {
+  isServerAvailable()
+    .then(available => {
+      if (!available) {
         server_unavailable = true
-        ReactDOM.render(<h1>Server not available</h1>, root)
-      } else if(server_unavailable) {
-        server_unavailable = false
-        renderPage()
+        ReactDOM.render(<>Server not available</>, server_error)
       }
-    }, 5000)
-  })
+    })
+
+  setInterval(async () => {
+    if (!await isServerAvailable()) {
+      server_unavailable = true
+      ReactDOM.render(<>Server not available</>, server_error)
+    } else if (server_unavailable) {
+      server_unavailable = false
+      ReactDOM.render(<></>, server_error)
+    }
+  }, 5000)
+
+})()
 
 function renderPage() {
   ReactDOM.render(
@@ -58,7 +60,7 @@ function renderPage() {
         </Switch>
       </BrowserRouter>
     </React.StrictMode>,
-    root
+    document.getElementById('root')
   )
 }
 
