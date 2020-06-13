@@ -11,7 +11,7 @@ export class TournamentInfo {
         public participants_limit?: number | null,
         public joining_deadline?: Date,
         public current_contestants_amount?: number,
-        public logos?: { id: number, data: Blob }[]
+        public logos?: { id?: number, data?: Blob }[]
     ) { }
 }
 

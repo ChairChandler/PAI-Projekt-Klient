@@ -12,20 +12,16 @@ export function validateDescription(description: string): boolean {
     return description?.length <= max
 }
 
-export function validateDatetime(date: Date): boolean {
+export function validateDatetime(date: Date, deadline: Date): boolean {
     if (date === undefined) {
         return false;
     }
-
-    return isAfterCurrentDate(date)
+    
+    return isAfterCurrentDate(date) && isBeforeTournamentDay(deadline, date)
 }
 
-export function validateParticipantsLimit(participantsAmount: number, limit?: number): boolean {
-    if (participantsAmount === undefined) {
-        return false;
-    }
-
-    return limit == null || limit >= participantsAmount
+export function validateParticipantsLimit(limit: number, participantsAmount: number|null): boolean {
+    return limit === Infinity || participantsAmount == null || limit >= participantsAmount
 }
 
 export function validateJoiningDeadline(date: Date, tournamentDate: Date): boolean {
@@ -43,7 +39,7 @@ export function validateJoiningDeadline(date: Date, tournamentDate: Date): boole
 
 
 function isAfterCurrentDate(date: Date): boolean {
-    return getOnlyDate(new Date()).getTime() >= getOnlyDate(date).getTime()
+    return getOnlyDate(new Date()).getTime() < getOnlyDate(date).getTime()
 }
 
 function isBeforeTournamentDay(date: Date, tournamentDate: Date): boolean {

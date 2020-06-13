@@ -3,7 +3,7 @@ import { TournamentInfo } from 'models/tournament'
 import { Loader } from 'google-maps';
 import validationInfo from 'config/validation.json';
 import * as vld from 'validation/tournament'
-import { getOnlyDateString } from 'utils/date'
+import { getOnlyDateString, oneDayAfterNowDate } from 'utils/date'
 import TournamentService from 'services/tournament/tournament'
 import './style.css';
 
@@ -17,14 +17,20 @@ interface Props {
 }
 
 interface State {
-    logos?: { id: number, data: string }[]
+    logos?: { id?: number, data?: Blob, text: string }[]
     marker?: google.maps.Marker
+    inputsValidation: {
+        name?: boolean
+        description?: boolean
+        tournament_date?: boolean
+        joining_deadline?: boolean
+    }
 }
 
 export default class EditPanel extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
-        this.state = {}
+        this.state = { inputsValidation: {} }
     }
 
     componentDidMount = async () => {
@@ -46,13 +52,13 @@ export default class EditPanel extends React.Component<Props, State> {
         return marker
     }
 
-    private initLogos = async (): Promise<{ id: number, data: string }[]> => {
+    private initLogos = async (): Promise<{ id: number, data: Blob, text: string }[]> => {
         const data = this.props.data.logos?.map(({ id, data }) => {
 
             const buffer = Buffer.from(data["data"])
             const dataUrl = buffer.toString('utf-8')
 
-            return { id, data: dataUrl }
+            return { id, data: data["data"], text: dataUrl }
         })
 
         return data
@@ -61,14 +67,14 @@ export default class EditPanel extends React.Component<Props, State> {
     componentDidUpdate = () => {
         // set cross position to img position, 10% of img width, height
         const factor = 0.1
-        
-        this.state.logos?.forEach(({id}) => {
-            const cross = $(`logo-cross-remove-${id}`)
+
+        this.state.logos?.forEach((v, index) => {
+            const cross = $(`logo-cross-remove-${index}`)
             const img = cross.next('img')
             const { left, top } = img.position()
             const [width, height] = [factor * img.width(), factor * img.height()]
 
-            cross.css({left, top, width, height})
+            cross.css({ left, top, width, height })
         })
     }
 
@@ -85,18 +91,17 @@ export default class EditPanel extends React.Component<Props, State> {
         const nameVal = name.val() as string
         const descriptionVal = description.val() as string
         const dateVal = new Date(date.val() as string)
-        const infinityVal = $('#infinity').is(':checked')
-        const limitVal = infinityVal ? null : limit.val() as number
+        const limitVal = limit.val() as string
         const deadlineVal = new Date(deadline.val() as string)
 
 
         const ok = [
-            vld.validateName(nameVal),
-            vld.validateDescription(descriptionVal),
-            vld.validateDatetime(dateVal),
-            vld.validateJoiningDeadline(deadlineVal, dateVal),
-            vld.validateParticipantsLimit(this.props.data.current_contestants_amount, limitVal)
+            this.changeValidationInfo(vld.validateName(nameVal), name, 'name'),
+            this.changeValidationInfo(vld.validateDescription(descriptionVal), description, 'description'),
+            this.changeValidationInfo(vld.validateDatetime(dateVal, deadlineVal), date, 'tournament_date'),
+            this.changeValidationInfo(vld.validateJoiningDeadline(deadlineVal, dateVal), deadline, 'joining_deadline'),
         ].every(Boolean)
+
 
         if (ok) {
             const payload = new TournamentInfo()
@@ -104,11 +109,22 @@ export default class EditPanel extends React.Component<Props, State> {
             payload.description = descriptionVal
             payload.datetime = dateVal
             payload.joining_deadline = deadlineVal
-            payload.participants_limit = limitVal
+            payload.participants_limit = limitVal.length > 0 ? Number.parseInt(limitVal) : null
             payload.localization_lat = position.lat
             payload.localization_lng = position.lng
-            payload.logos = await Promise.all(this.state.logos.map(
-                ({ id, data }) => ({ id, data: new Blob([data], { type: 'contentType' }) })))
+
+            if (this.state.logos) {
+                payload.logos = await Promise.all(this.state.logos.map(
+                    ({ id, data }) => {
+                        if (this.props.action === 'CREATE') {
+                            return { data }
+                        } else {
+                            return { id, data }
+                        }
+                    }))
+            } else {
+                payload.logos = []
+            }
 
             const { error } = await TournamentService.modifyOrCreateTournamentInfo(payload, this.props.action)
             if (error) {
@@ -119,10 +135,38 @@ export default class EditPanel extends React.Component<Props, State> {
         }
     }
 
-    private removeLogo = (id: number) => {
-        const index = this.state.logos.findIndex(v => v.id === id)
-        this.state.logos.splice(index)
-        this.setState(this.state)
+    private changeValidationInfo = (validated: boolean, input: JQuery<HTMLElement>, field: string) => {
+        const state = { ...this.state }
+        state.inputsValidation[field] = validated
+        this.setState(state)
+
+        if (validated) {
+            input.removeClass('is-invalid');
+            input.addClass('is-valid');
+        } else {
+            input.removeClass('is-valid');
+            input.addClass('is-invalid');
+        }
+
+        return validated
+    }
+
+    private addLogo = (files: FileList) => {
+        const data = new Blob([files[0]], { type: 'image/*' })
+        const buffer = Buffer.from(data)
+        const text = buffer.toString('utf-8')
+        this.state.logos.push({ data, text })
+        this.forceUpdate()
+    }
+
+    private removeLogo = (index: number) => {
+        if (this.props.action == 'EDIT' && this.state.logos[index].id) {
+            this.state.logos[index].data = null
+        } else {
+            this.state.logos.splice(index)
+        }
+
+        this.forceUpdate()
     }
 
     render = () => {
@@ -133,11 +177,15 @@ export default class EditPanel extends React.Component<Props, State> {
                     type="text"
                     className="form-control"
                     id="name"
-                    minLength={validationInfo.tournament_name.min}
                     maxLength={validationInfo.tournament_name.max}
                     defaultValue={this.props.data.tournament_name}
+                    autoComplete="off"
                 />
                 <small>Text have to be {validationInfo.tournament_name.min}-{validationInfo.tournament_name.max} characters long.</small>
+                {
+                    !this.state.inputsValidation.name &&
+                    <div className="invalid-feedback">Wrong tournament name</div>
+                }
             </div>
 
             <div className="form-group">
@@ -147,8 +195,13 @@ export default class EditPanel extends React.Component<Props, State> {
                     id="description"
                     maxLength={validationInfo.description.max}
                     defaultValue={this.props.data.description}
+                    autoComplete="off"
                 />
                 <small>Description have to be max {validationInfo.description.max} characters long.</small>
+                {
+                    !this.state.inputsValidation.description &&
+                    <div className="invalid-feedback">Wrong description</div>
+                }
             </div>
 
             <div className="form-group">
@@ -157,9 +210,14 @@ export default class EditPanel extends React.Component<Props, State> {
                     type="date"
                     className="form-control"
                     id="date"
-                    min={getOnlyDateString(new Date())}
+                    min={getOnlyDateString(oneDayAfterNowDate())}
                     defaultValue={this.props.data.datetime ? getOnlyDateString(this.props.data.datetime) : null}
                 />
+                <small>Tournament date have to be minimum 1 day later than joining deadline.</small>
+                {
+                    !this.state.inputsValidation.tournament_date &&
+                    <div className="invalid-feedback">Wrong date</div>
+                }
             </div>
 
             <div className="form-group">
@@ -174,36 +232,43 @@ export default class EditPanel extends React.Component<Props, State> {
             </div>
 
             <div className="form-group">
-                <label>Infinity</label>
-                <input
-                    type="checkbox"
-                    id="infinity"
-                />
-            </div>
-
-            <div className="form-group">
                 <label className="form-check-label">Joining deadline</label>
                 <input
                     type="date"
                     className="form-control"
                     id="deadline"
-                    min={getOnlyDateString(new Date())}
+                    min={getOnlyDateString(oneDayAfterNowDate())}
                     defaultValue={this.props.data.joining_deadline ? getOnlyDateString(this.props.data.joining_deadline) : null}
                 />
+                <small>Joining deadline have to be minimum 1 day before tournament date.</small>
+                {
+                    !this.state.inputsValidation.joining_deadline &&
+                    <div className="invalid-feedback">Wrong joining deadline</div>
+                }
             </div>
 
-            <div id="map" />
+            <div className="form-group">
+                <div id="map" />
+            </div>
+
+            <div className="form-group">
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(ev) => this.addLogo(ev.target.files)}
+                />
+            </div>
 
             {this.state.logos?.length > 0 &&
                 <h1>Sponsors</h1> &&
                 <div id="tournament-container-logo" className="container-cols">
                     {
-                        this.state.logos.map(({ id, data }) =>
+                        this.state.logos.map(({ text }, index) =>
                             <>
-                                <div id={`logo-cross-remove-${id}`} onClick={() => this.removeLogo(id)}>
+                                <div id={`logo-cross-remove-${index}`} onClick={() => this.removeLogo(index)}>
                                     &times;
                                 </div>
-                                <img className="tournament-logo" src={data} alt={`logo_${id}`} />
+                                <img className="tournament-logo" src={text} alt={`logo_${index}`} />
                             </>)
                     }
                 </div>

@@ -48,12 +48,12 @@ export default class LoginDialog extends React.Component<Props, State> {
       }
     };
 
-    const state = { ...this.state }
+    const inVal = this.state.inputsValidation
     for (const input in validationFlags) {
-      state.inputsValidation[input] = validationFlags[input].flag
+      inVal[input] = validationFlags[input].flag
       this.changeValidationInfo(validationFlags[input].flag, validationFlags[input].ref)
     }
-    this.setState(state)
+    this.setState({...this.state, ...inVal})
     const validated = Object.values(validationFlags).every(v => v.flag)
 
     if (validated) {
