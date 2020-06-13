@@ -17,7 +17,7 @@ interface Props {
 }
 
 interface State {
-    logos?: { id?: number, data?: Blob, text: string }[]
+    logos: { id?: number, data?: Blob, text: string }[]
     marker?: google.maps.Marker
     inputsValidation: {
         name?: boolean
@@ -30,12 +30,12 @@ interface State {
 export default class EditPanel extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
-        this.state = { inputsValidation: {} }
+        this.state = { inputsValidation: {}, logos: [] }
     }
 
     componentDidMount = async () => {
         const [marker, logos] = await Promise.all([this.initGoogleMap(), this.initLogos()])
-        this.setState({ marker, logos })
+        this.setState({ ...this.state, marker, logos })
     }
 
     private initGoogleMap = async (): Promise<google.maps.Marker> => {
@@ -59,23 +59,9 @@ export default class EditPanel extends React.Component<Props, State> {
             const dataUrl = buffer.toString('utf-8')
 
             return { id, data: data["data"], text: dataUrl }
-        })
+        }) ?? []
 
         return data
-    }
-
-    componentDidUpdate = () => {
-        // set cross position to img position, 10% of img width, height
-        const factor = 0.1
-
-        this.state.logos?.forEach((v, index) => {
-            const cross = $(`logo-cross-remove-${index}`)
-            const img = cross.next('img')
-            const { left, top } = img.position()
-            const [width, height] = [factor * img.width(), factor * img.height()]
-
-            cross.css({ left, top, width, height })
-        })
     }
 
     private onSubmit = async (event) => {
@@ -105,6 +91,7 @@ export default class EditPanel extends React.Component<Props, State> {
 
         if (ok) {
             const payload = new TournamentInfo()
+            payload.tournament_id = this.props.data.tournament_id
             payload.tournament_name = nameVal
             payload.description = descriptionVal
             payload.datetime = dateVal
@@ -152,21 +139,27 @@ export default class EditPanel extends React.Component<Props, State> {
     }
 
     private addLogo = (files: FileList) => {
-        const data = new Blob([files[0]], { type: 'image/*' })
-        const buffer = Buffer.from(data)
-        const text = buffer.toString('utf-8')
-        this.state.logos.push({ data, text })
-        this.forceUpdate()
+        const reader = new FileReader()
+        const blob = files[0]
+
+        reader.addEventListener('load', ev => {
+            this.state.logos.push({ data: blob, text: ev.target.result as string })
+            this.forceUpdate()
+        })
+
+        reader.readAsDataURL(blob)
     }
 
     private removeLogo = (index: number) => {
-        if (this.props.action == 'EDIT' && this.state.logos[index].id) {
-            this.state.logos[index].data = null
+        if (this.props.action === 'EDIT' && this.state.logos[index].id) {
+            this.setState(state => {
+                state.logos[index].data = null
+                return state
+            })
         } else {
-            this.state.logos.splice(index)
+            delete this.state.logos[index]
+            this.forceUpdate()
         }
-
-        this.forceUpdate()
     }
 
     render = () => {
@@ -211,7 +204,7 @@ export default class EditPanel extends React.Component<Props, State> {
                     className="form-control"
                     id="date"
                     min={getOnlyDateString(oneDayAfterNowDate())}
-                    defaultValue={this.props.data.datetime ? getOnlyDateString(this.props.data.datetime) : null}
+                    defaultValue={this.props.data.datetime ? getOnlyDateString(new Date(this.props.data.datetime)) : null}
                 />
                 <small>Tournament date have to be minimum 1 day later than joining deadline.</small>
                 {
@@ -238,7 +231,7 @@ export default class EditPanel extends React.Component<Props, State> {
                     className="form-control"
                     id="deadline"
                     min={getOnlyDateString(oneDayAfterNowDate())}
-                    defaultValue={this.props.data.joining_deadline ? getOnlyDateString(this.props.data.joining_deadline) : null}
+                    defaultValue={this.props.data.joining_deadline ? getOnlyDateString(new Date(this.props.data.joining_deadline)) : null}
                 />
                 <small>Joining deadline have to be minimum 1 day before tournament date.</small>
                 {
@@ -248,33 +241,40 @@ export default class EditPanel extends React.Component<Props, State> {
             </div>
 
             <div className="form-group">
+                <label className="form-check-label">Location</label>
                 <div id="map" />
             </div>
 
-            <div className="form-group">
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(ev) => this.addLogo(ev.target.files)}
-                />
+            <div className="flex">
+                <h2>Sponsors Logo</h2>
+                <div className="form-group">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(ev) => {
+                            if (ev.target.files.length) {
+                                this.addLogo(ev.target.files)
+                            }
+                        }}
+                    />
+                </div>
             </div>
 
-            {this.state.logos?.length > 0 &&
-                <h1>Sponsors</h1> &&
+            {this.state.logos.length > 0 &&
                 <div id="tournament-container-logo" className="container-cols">
                     {
                         this.state.logos.map(({ text }, index) =>
-                            <>
+                            <span className="tournament-logo">
                                 <div id={`logo-cross-remove-${index}`} onClick={() => this.removeLogo(index)}>
                                     &times;
                                 </div>
-                                <img className="tournament-logo" src={text} alt={`logo_${index}`} />
-                            </>)
+                                <img style={{ "maxWidth": "100%" }} src={text} alt={`logo_${index}`}></img>
+                            </span>)
                     }
                 </div>
             }
 
-            <div className="flex">
+            <div className="flex" style={{ marginTop: '20px' }}>
                 <input
                     type="submit"
                     className="btn btn-primary"

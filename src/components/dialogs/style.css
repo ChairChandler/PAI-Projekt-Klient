@@ -17,7 +17,7 @@
   display: flex;
 }
 
-.flex>input {
+.flex>* {
   white-space: normal;
   word-wrap: break-word;
   margin-right: 10px;

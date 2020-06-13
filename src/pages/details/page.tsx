@@ -62,7 +62,7 @@ export default class DetailsPage extends React.Component<Props, State> {
             case pages.touchPagePath:
 
                 this.state = {
-                    data: recvState.data,
+                    tournamentID: recvState.id,
                     backPath: pages.touchPagePath,
                     loginSubscriber:
                         <LoginSubscriber
@@ -70,7 +70,8 @@ export default class DetailsPage extends React.Component<Props, State> {
                             onError={(err) => alert(err)}
                         />
                 }
-
+                this.retrieveTournamentInformation()
+                
                 break
         }
     }

@@ -19,14 +19,14 @@ import isServerAvailable from 'utils/server-status'
     .then(available => {
       if (!available) {
         server_unavailable = true
-        ReactDOM.render(<>Server not available</>, server_error)
+        ReactDOM.render(<>Server unavailable</>, server_error)
       }
     })
 
   setInterval(async () => {
     if (!await isServerAvailable()) {
       server_unavailable = true
-      ReactDOM.render(<>Server not available</>, server_error)
+      ReactDOM.render(<>Server unavailable</>, server_error)
     } else if (server_unavailable) {
       server_unavailable = false
       ReactDOM.render(<></>, server_error)

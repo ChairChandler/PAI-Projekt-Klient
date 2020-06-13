@@ -54,7 +54,7 @@ export default class InfoCard extends React.Component<Props, State> {
         return <div className="container-context container-rows">
             <h1>{this.props.data?.tournament_name}</h1>
 
-            <p>123{this.props.data?.description}</p>
+            <p>{this.props.data?.description}</p>
 
             <div className="container-cols">
                 <table>
