@@ -54,6 +54,10 @@ export default class JoinDialog extends React.Component<Props, {}> {
                         />
                     </div>
 
+                    <small className="form-text text-muted">
+                        License ID and Ranking No have to be unique.
+                    </small>
+
                     <div className="flex">
                         <input
                             type="submit"

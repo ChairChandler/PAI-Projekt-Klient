@@ -7,17 +7,13 @@ interface Props {
     data: TournamentInfo
 }
 
-interface State {
-    logos?: { id: number, data: string }[]
-}
-
-export default class InfoCard extends React.Component<Props, State> {
+export default class InfoCard extends React.Component<Props, {}> {
     componentWillMount = async () => {
         await this.componentWillReceiveProps(this.props)
     }
 
     componentWillReceiveProps = async (nextProps: Props) => {
-        await Promise.all([this.initGoogleMap(nextProps), this.initLogos(nextProps)])
+        await this.initGoogleMap(nextProps)
     }
 
     private initGoogleMap = async (props: Props) => {
@@ -32,21 +28,6 @@ export default class InfoCard extends React.Component<Props, State> {
         const mapElement = $(`#map`)[0]
         const map = new google.maps.Map(mapElement, mapInfo)
         new google.maps.Marker({ position: center, map })
-    }
-
-    private initLogos = async (props: Props) => {
-        const data = await Promise.all(
-            props.data.logos.map(({ id, data }) => {
-                const array = (data["data"] as Array<number>)
-                const dataUrl = new Buffer(array).toString('base64')
-                console.log(dataUrl)
-                return { id, data: dataUrl }
-            })
-        )
-        console.log(data)
-        const state = { ...this.state }
-        state.logos = data
-        this.setState(state)
     }
 
     render = () => {
@@ -85,14 +66,16 @@ export default class InfoCard extends React.Component<Props, State> {
                 <div id='map' />
             </div>
 
-            {this.state?.logos.length > 0 &&
-                <h1>Sponsors</h1> &&
-                <div id="tournament-container-logo" className="container-cols">
-                    {
-                        this.state.logos.map(({ id, data }) =>
-                            <img className="tournament-logo" src={data} alt={`logo_${id}`}></img>)
-                    }
-                </div>
+            {this.props.data.logos?.length > 0 &&
+                <>
+                    <h1>Sponsors</h1>
+                    <div id="tournament-container-logo" className="container-cols">
+                        {
+                            this.props.data.logos.map(({ id, data }) =>
+                                <img className="tournament-logo" src={data} alt={`logo_${id}`}></img>)
+                        }
+                    </div>
+                </>
             }
         </div >
     }

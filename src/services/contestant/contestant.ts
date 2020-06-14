@@ -36,7 +36,7 @@ class ContestantService {
             if (!data.ok) {
                 return { error: await data.text() }
             }
-
+            
             const json = await data.json()
             return { contestant: json.taking_part }
         } catch (err) {

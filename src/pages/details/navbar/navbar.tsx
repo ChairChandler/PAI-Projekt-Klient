@@ -8,6 +8,7 @@ import { TournamentInfo } from 'models/tournament';
 import LoginSubscriber from 'components/subscriber/login/login-subscriber'
 import LoginService from 'services/user/login'
 import ContestantService from 'services/contestant/contestant'
+import contestant from "services/contestant/contestant";
 
 type VisibleDialog = 'login' | 'register' | 'forgotPassword' | 'join'
 type VisibleNavbar = 'unlogged' | 'logged'
@@ -82,7 +83,7 @@ export default class PageNavbar extends React.Component<Props, State> {
     render = () => {
         const { current_contestants_amount, participants_limit } = this.props.data
         const isMaxParticipants = current_contestants_amount === (participants_limit ?? Infinity)
-
+        
         let navbar
         switch (this.state.visibleNavbar) {
             case 'unlogged':

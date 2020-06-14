@@ -23,7 +23,7 @@ class TournamentService {
             if (!data.ok) {
                 return { error: 'Failed to retrieve tourament informations' }
             }
-
+            
             return { data: await data.json() }
         } catch (err) {
             return { error: err.message }

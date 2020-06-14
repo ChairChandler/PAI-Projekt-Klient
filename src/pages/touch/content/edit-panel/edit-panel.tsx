@@ -17,7 +17,7 @@ interface Props {
 }
 
 interface State {
-    logos: { id?: number, data?: string }[]
+    logos: ({ id?: number, data?: string } | null)[]
     marker?: google.maps.Marker
     inputsValidation: {
         name?: boolean
@@ -30,12 +30,14 @@ interface State {
 export default class EditPanel extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
-        this.state = { inputsValidation: {}, logos: [] }
+        this.state = { inputsValidation: {}, logos: this.props.data.logos ?? [] }
     }
 
     componentDidMount = async () => {
         const marker = await this.initGoogleMap()
-        this.setState({ ...this.state, marker, logos: this.props.data.logos })
+        const state = { ...this.state }
+        state.marker = marker
+        this.setState(state)
     }
 
     private initGoogleMap = async (): Promise<google.maps.Marker> => {
@@ -89,7 +91,8 @@ export default class EditPanel extends React.Component<Props, State> {
             payload.localization_lng = position.lng
 
             if (this.state.logos) {
-                payload.logos = await Promise.all(this.state.logos.map(
+                const logos = this.state.logos.filter(v => v)
+                payload.logos = await Promise.all(logos.map(
                     ({ id, data }) => {
                         if (this.props.action === 'CREATE') {
                             return { data }
@@ -251,7 +254,7 @@ export default class EditPanel extends React.Component<Props, State> {
             {this.state.logos.length > 0 &&
                 <div id="tournament-container-logo" className="container-cols">
                     {
-                        this.state.logos.map(({ data }, index) =>
+                        this.state.logos.map(({ data }, index) => data &&
                             <span className="tournament-logo">
                                 <div id={`logo-cross-remove-${index}`} onClick={() => this.removeLogo(index)}>
                                     &times;

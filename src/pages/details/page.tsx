@@ -63,7 +63,7 @@ export default class DetailsPage extends React.Component<Props, State> {
 
                 this.state = {
                     tournamentID: recvState.id,
-                    backPath: pages.touchPagePath,
+                    backPath: pages.mainPagePath,
                     loginSubscriber:
                         <LoginSubscriber
                             onLogout={() => this.onRedirect(pages.mainPagePath)}
