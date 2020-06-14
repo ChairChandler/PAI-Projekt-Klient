@@ -35,14 +35,15 @@ export default class InfoCard extends React.Component<Props, State> {
     }
 
     private initLogos = async (props: Props) => {
-        const data = props.data.logos.map(({ id, data }) => {
-
-            const buffer = Buffer.from(data["data"])
-            const dataUrl = buffer.toString('utf-8')
-
-            return { id, data: dataUrl }
-        })
-
+        const data = await Promise.all(
+            props.data.logos.map(({ id, data }) => {
+                const array = (data["data"] as Array<number>)
+                const dataUrl = new Buffer(array).toString('base64')
+                console.log(dataUrl)
+                return { id, data: dataUrl }
+            })
+        )
+        console.log(data)
         const state = { ...this.state }
         state.logos = data
         this.setState(state)

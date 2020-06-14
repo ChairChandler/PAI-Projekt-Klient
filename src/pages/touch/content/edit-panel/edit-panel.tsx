@@ -17,7 +17,7 @@ interface Props {
 }
 
 interface State {
-    logos: { id?: number, data?: Blob, text: string }[]
+    logos: { id?: number, data?: string }[]
     marker?: google.maps.Marker
     inputsValidation: {
         name?: boolean
@@ -34,8 +34,8 @@ export default class EditPanel extends React.Component<Props, State> {
     }
 
     componentDidMount = async () => {
-        const [marker, logos] = await Promise.all([this.initGoogleMap(), this.initLogos()])
-        this.setState({ ...this.state, marker, logos })
+        const marker = await this.initGoogleMap()
+        this.setState({ ...this.state, marker, logos: this.props.data.logos })
     }
 
     private initGoogleMap = async (): Promise<google.maps.Marker> => {
@@ -50,18 +50,6 @@ export default class EditPanel extends React.Component<Props, State> {
         const marker = new google.maps.Marker({ position: center, map, draggable: true })
 
         return marker
-    }
-
-    private initLogos = async (): Promise<{ id: number, data: Blob, text: string }[]> => {
-        const data = this.props.data.logos?.map(({ id, data }) => {
-
-            const buffer = Buffer.from(data["data"])
-            const dataUrl = buffer.toString('utf-8')
-
-            return { id, data: data["data"], text: dataUrl }
-        }) ?? []
-
-        return data
     }
 
     private onSubmit = async (event) => {
@@ -143,7 +131,7 @@ export default class EditPanel extends React.Component<Props, State> {
         const blob = files[0]
 
         reader.addEventListener('load', ev => {
-            this.state.logos.push({ data: blob, text: ev.target.result as string })
+            this.state.logos.push({ data: ev.target.result as string })
             this.forceUpdate()
         })
 
@@ -263,12 +251,12 @@ export default class EditPanel extends React.Component<Props, State> {
             {this.state.logos.length > 0 &&
                 <div id="tournament-container-logo" className="container-cols">
                     {
-                        this.state.logos.map(({ text }, index) =>
+                        this.state.logos.map(({ data }, index) =>
                             <span className="tournament-logo">
                                 <div id={`logo-cross-remove-${index}`} onClick={() => this.removeLogo(index)}>
                                     &times;
                                 </div>
-                                <img style={{ "maxWidth": "100%" }} src={text} alt={`logo_${index}`}></img>
+                                <img style={{ "maxWidth": "100%" }} src={data} alt={`logo_${index}`}></img>
                             </span>)
                     }
                 </div>
