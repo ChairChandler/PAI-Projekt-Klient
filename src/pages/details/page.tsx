@@ -9,6 +9,7 @@ import { TournamentInfo } from 'models/tournament'
 import LoginSubscriber from 'components/subscriber/login/login-subscriber'
 import * as pages from 'pages/pages'
 import TournamentService from 'services/tournament/tournament'
+import LoginService from 'services/user/login'
 
 interface Props {
     location
@@ -135,7 +136,11 @@ export default class DetailsPage extends React.Component<Props, State> {
                             data={this.state.data}
                             onModify={() => this.onRedirect(pages.touchPagePath, { data: this.state.data })}
                             onBack={() => this.onRedirect(this.state.backPath)}
-                            onShowLadder={() => this.onRedirect(pages.ladderPagePath, { id: this.state.data.tournament_id })} />
+                            onShowLadder={() => this.onRedirect(pages.ladderPagePath, {
+                                tournament_id: this.state.data.tournament_id,
+                                tournament_finished: this.state.data.finished,
+                                contestant_user_id: this.state.backPath === pages.managePagePath ? LoginService.getSelfID() : null
+                            })} />
                     </nav>
 
                     <Logo />

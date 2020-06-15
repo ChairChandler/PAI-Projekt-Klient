@@ -6,7 +6,7 @@ import './style.css'
 import './jquery.bracket.scss'
 
 interface Props {
-    tournament_finished: boolean
+    tournament_finished?: boolean
     tournament_id: number
     contestant_user_id?: number
     onError?: (err: string) => void

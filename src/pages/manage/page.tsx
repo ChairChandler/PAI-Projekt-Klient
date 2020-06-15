@@ -70,7 +70,7 @@ export default class ManagePage extends React.Component<{}, State> {
                     name: o.tournament_name,
                     date: o.datetime,
                     take_part: !LoginService.isPerson(o.owner_id),
-                    finished: new Date(o.datetime).getTime() < new Date().getTime()
+                    finished: o.finished
                 })
             }
 
