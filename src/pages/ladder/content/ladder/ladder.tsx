@@ -2,10 +2,13 @@ import React from 'react';
 import { LadderInfo, ContestantDecision } from 'models/tournament'
 import TournamentService from 'services/tournament/tournament'
 import ContestantService from 'services/contestant/contestant'
+import './style.css'
 import './jquery.bracket.scss'
 
 interface Props {
+    tournament_finished: boolean
     tournament_id: number
+    contestant_user_id?: number
     onError?: (err: string) => void
 }
 
@@ -26,12 +29,7 @@ export default class Ladder extends React.Component<Props, State> {
             this.props.onError(error)
         } else {
             const state = { ...this.state }
-            //state.ladder = data
-            state.ladder = new LadderInfo(3, [
-                { id: 0, name: '1', node_id: 1 },
-                { id: 1, name: '2', node_id: 2 },
-                { id: 3, name: '3', node_id: 3 }
-            ])
+            state.ladder = data
             this.setState(state)
 
             $('#ladder')['bracket']({
@@ -41,69 +39,95 @@ export default class Ladder extends React.Component<Props, State> {
     }
 
     private parseData = () => {
-        const teams = this.parseTeams()
+        const levels = this.parseTeams()
+        const teams = levels[0].map(t => t.opponents)
+        const results = levels.map(l => l.map(t => t.results))
 
         const minimalData = {
-            teams,
-            results: [
-                [[1, 2], [0, null]],       /* first round */
-
-            ]
+            teams, results
         }
+        console.log(minimalData)
         return minimalData
     }
 
-    private parseTeams = () => {
-        const findEnemyInLine = node => {
+    private parseTeams = (): { opponents: string | null[], results: number | null[] }[][] => {
+        const contestants = this.state.ladder?.contestants
+        const findEnemyInLine = (node: number) => {
             const winnerNode = Math.floor((node - 1) / 2)
-            if (winnerNode < 0) {
-                return null
-            }
-
-            const enemy = this.state.ladder.contestants.find(
+            const enemy = contestants.find(
                 ({ node_id }) => node_id === winnerNode
             )
-
-            return enemy?.name || findEnemyInLine(winnerNode)
+            return winnerNode < 0 ? null : enemy?.name ?? findEnemyInLine(winnerNode)
         }
 
-        const startNode = Math.pow(2, Math.floor(Math.log2(this.state.ladder?.nodes + 1)))
+        const prevEndLevelNode = (node: number) => Math.pow(2,
+            Math.floor(Math.log2(node + 1))
+        ) - 2
+
+
+
+        let startNode = Math.pow(2,
+            Math.floor(Math.log2(this.state.ladder?.lastNode + 1)) + 1
+        ) - 2
 
         const teams = []
-        const contestants = this.state.ladder?.contestants
-        for (let node = startNode; node >= 0; node -= 2) {
-            const c = contestants.find(
-                ({ node_id }) => node_id === node
-            )
-
-            if (c) {
-                const winnerNode = Math.floor((node - 1) / 2)
-                const enemyLoserNode = 2 * winnerNode + ((Math.floor(node / 2) !== winnerNode) ? 1 : 2)
-
-                let enemy = this.state.ladder.contestants.find(
-                    ({ node_id: contNode }) => contNode === enemyLoserNode || contNode === winnerNode
+        do {
+            const levelTeams = []
+            // eslint-disable-next-line @typescript-eslint/no-use-before-define
+            let endNode = prevEndLevelNode(node ?? startNode)
+            for (var node = startNode; node > endNode; node -= 2) {
+                const [a, b] = contestants.filter(
+                    // eslint-disable-next-line no-loop-func
+                    ({ node_id }) => node_id === node || node_id === (node - 1)
                 )
 
-                if(!enemy) {
-                    enemy = findEnemyInLine(winnerNode)
+                if (a && b) {
+                    levelTeams.push({ opponents: [a.name, b.name], results: [null, null] })
+                } else {
+                    levelTeams.push({ opponents: [a?.name ?? b?.name ?? null, findEnemyInLine(node)], results: [0, 1] })
                 }
-
-                teams.push(node % 2 ? [c.name, enemy.name] : [enemy.name, c.name])
             }
-        }
+            teams.push(levelTeams)
+            startNode = node
+        } while (node > 0)
 
-        console.log(teams)
         return teams
     }
 
-    private parseResults = () => {
-        for (let nodes = this.state.ladder?.nodes; nodes >= 0; nodes--) {
-
+    private sendDecision = async (decision: 'winner' | 'loser') => {
+        const payload = new ContestantDecision(
+            this.props.tournament_id,
+            this.props.contestant_user_id,
+            decision === 'winner'
+        )
+        const { error } = await ContestantService.setDecision(payload)
+        if (error) {
+            this.props.onError(error)
         }
-
     }
 
     render = () => {
-        return <div id="ladder" className="jQBracket" style={{}} />
+        return <div className="container-context container-center-col">
+            <div id="ladder" className="jQBracket" />
+
+            {
+                this.props.contestant_user_id && !this.props.tournament_finished &&
+                <div className="container-center-row" style={{ marginTop: '200px' }}>
+                    <input
+                        type="button"
+                        className="btn btn-primary"
+                        value="WINNER"
+                        onClick={() => this.sendDecision('winner')}
+                    />
+
+                    <input
+                        type="button"
+                        className="btn btn-primary"
+                        value="LOSER"
+                        onClick={() => this.sendDecision('loser')}
+                    />
+                </div>
+            }
+        </div>
     }
 }

@@ -25,7 +25,7 @@ export class ContestantInfo {
 
 export class LadderInfo {
     constructor(
-        public nodes: number,
+        public lastNode: number,
         public contestants: { id: number, name: string, node_id: number }[] //node_id min 0
     ) { }
 }
@@ -33,7 +33,7 @@ export class LadderInfo {
 export class ContestantDecision {
     constructor(
         public tournament_id: number,
-        public contestant_id: number,
+        public contestant_user_id: number,
         public winner: boolean
     ) {}
 }

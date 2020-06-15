@@ -84,8 +84,8 @@ export default class PageNavbar extends React.Component<Props, State> {
     render = () => {
         const { current_contestants_amount, participants_limit, datetime } = this.props.data
         const isMaxParticipants = current_contestants_amount === (participants_limit ?? Infinity)
-        const isAfterDatetime = getOnlyDate(new Date()).getTime() > getOnlyDate(new Date(datetime)).getTime()
-
+        //const isAfterDatetime = getOnlyDate(new Date()).getTime() > getOnlyDate(new Date(datetime)).getTime()
+        const isAfterDatetime = true
         let navbar
         switch (this.state.visibleNavbar) {
             case 'unlogged':
