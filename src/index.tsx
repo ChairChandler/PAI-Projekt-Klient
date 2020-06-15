@@ -7,6 +7,7 @@ import { Switch, Route, Redirect, BrowserRouter } from 'react-router-dom';
 import DetailsPage from 'pages/details/page';
 import ManagePage from 'pages/manage/page'
 import TouchPage from 'pages/touch/page';
+import LadderPage from 'pages/ladder/page'
 import routing_info from 'config/routing.json';
 import isServerAvailable from 'utils/server-status'
 
@@ -54,6 +55,10 @@ function renderPage() {
 
           <Route exact path={routing_info.touch} render={props =>
             <TouchPage {...props} />
+          } />
+
+          <Route exact path={routing_info.ladder} render={props =>
+            <LadderPage {...props} />
           } />
 
           <Redirect to={routing_info.main}></Redirect>

@@ -23,6 +23,7 @@ interface State {
 }
 
 export default class DetailsPage extends React.Component<Props, State> {
+    static prevPagePath?: string
 
     constructor(props: Props) {
         super(props)
@@ -59,6 +60,7 @@ export default class DetailsPage extends React.Component<Props, State> {
 
                 break
 
+
             case pages.touchPagePath:
 
                 this.state = {
@@ -71,9 +73,26 @@ export default class DetailsPage extends React.Component<Props, State> {
                         />
                 }
                 this.retrieveTournamentInformation()
-                
+
                 break
+
+            case pages.ladderPagePath:
+
+                this.state = {
+                    tournamentID: recvState.tournamentID,
+                    backPath: DetailsPage.prevPagePath,
+                    loginSubscriber: DetailsPage.prevPagePath === pages.managePagePath ?
+                        <LoginSubscriber
+                            onLogout={() => this.onRedirect(pages.mainPagePath)}
+                            onError={(err) => alert(err)}
+                        />
+                        :
+                        null
+                }
+                this.retrieveTournamentInformation()
         }
+
+        DetailsPage.prevPagePath = this.state.backPath
     }
 
     private retrieveTournamentInformation = async () => {
@@ -115,8 +134,8 @@ export default class DetailsPage extends React.Component<Props, State> {
                         <PageNavbar
                             data={this.state.data}
                             onModify={() => this.onRedirect(pages.touchPagePath, { data: this.state.data })}
-                            onBack={() => this.onRedirect(this.state.backPath)}>
-                        </PageNavbar>
+                            onBack={() => this.onRedirect(this.state.backPath)}
+                            onShowLadder={() => this.onRedirect(pages.ladderPagePath, { id: this.state.data.tournament_id })} />
                     </nav>
 
                     <Logo />

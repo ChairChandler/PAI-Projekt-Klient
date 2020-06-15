@@ -1,6 +1,7 @@
 import server_info from 'config/server.json'
 import { ContestantInfo, TournamentInfo } from 'models/tournament'
 import LoginService from 'services/user/login'
+import { ContestantDecision } from 'models/tournament'
 
 class ContestantService {
     join = async (payload: ContestantInfo): Promise<{ error?: string }> => {
@@ -36,7 +37,7 @@ class ContestantService {
             if (!data.ok) {
                 return { error: await data.text() }
             }
-            
+
             const json = await data.json()
             return { contestant: json.taking_part }
         } catch (err) {
@@ -56,6 +57,29 @@ class ContestantService {
             }
 
             return { data: await data.json() }
+        } catch (err) {
+            return { error: err.message }
+        }
+    }
+
+    setDecision = async (payload: ContestantDecision): Promise<{ error?: string }> => {
+        if (!LoginService.isAccountLoggedIn()) {
+            return { error: 'account not logged in' }
+        }
+
+        try {
+            const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/ladder`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+
+            if (!data.ok) {
+                return { error: await data.text() }
+            }
+
+            return {}
         } catch (err) {
             return { error: err.message }
         }

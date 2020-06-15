@@ -20,5 +20,20 @@ export class ContestantInfo {
         public tournament_id: number,
         public license_id: string,
         public ranking_pos: number
+    ) { }
+}
+
+export class LadderInfo {
+    constructor(
+        public nodes: number,
+        public contestants: { id: number, name: string, node_id: number }[] //node_id min 0
+    ) { }
+}
+
+export class ContestantDecision {
+    constructor(
+        public tournament_id: number,
+        public contestant_id: number,
+        public winner: boolean
     ) {}
 }

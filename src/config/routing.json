@@ -2,5 +2,6 @@
     "main": "/main",
     "details": "/details",
     "manage": "/manage",
-    "touch": "/touch"
+    "touch": "/touch",
+    "ladder": "/ladder"
 }

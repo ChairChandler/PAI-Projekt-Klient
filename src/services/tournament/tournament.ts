@@ -1,5 +1,6 @@
 import { TournamentInfo } from 'models/tournament'
 import server_info from 'config/server.json'
+import { LadderInfo } from 'models/tournament'
 
 export type TournamentShortInfo = { id: number, name: string, date: Date }
 
@@ -23,7 +24,7 @@ class TournamentService {
             if (!data.ok) {
                 return { error: 'Failed to retrieve tourament informations' }
             }
-            
+
             return { data: await data.json() }
         } catch (err) {
             return { error: err.message }
@@ -44,6 +45,19 @@ class TournamentService {
             }
 
             return {}
+        } catch (err) {
+            return { error: err.message }
+        }
+    }
+
+    retrieveLadder = async (tournament_id: number): Promise<{ error?: string, data?: LadderInfo }> => {
+        try {
+            const data = await fetch(`http://${server_info.ip}:${server_info.port}/tournament/ladder?tournament_id=${tournament_id}`)
+            if (!data.ok) {
+                return { error: await data.text() }
+            }
+            
+            return { data: await data.json() }
         } catch (err) {
             return { error: err.message }
         }
