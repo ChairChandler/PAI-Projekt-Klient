@@ -60,7 +60,10 @@ export default class LadderPage extends React.Component<Props, State> {
             <FadingAnimation>
                 <nav>
                     <PageNavbar
-                        onRouteBack={() => this.onRedirectToPage(this.state.backPagePath, { tournamentID: this.state.tournament_id })}
+                        onRouteBack={() => this.onRedirectToPage(this.state.backPagePath, { 
+                            tournamentID: this.state.tournament_id,
+                            user_take_part: this.state.contestant_user_id ? true : false
+                        })}
                     />
                 </nav>
 
@@ -69,7 +72,6 @@ export default class LadderPage extends React.Component<Props, State> {
                 <section>
                     <Ladder
                         contestant_user_id={this.state.contestant_user_id}
-                        tournament_finished={this.state.tournament_finished}
                         tournament_id={this.state.tournament_id}
                         onError={err => alert(err)}
                     />

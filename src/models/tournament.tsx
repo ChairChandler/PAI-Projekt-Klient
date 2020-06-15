@@ -12,7 +12,8 @@ export class TournamentInfo {
         public joining_deadline?: Date,
         public current_contestants_amount?: number,
         public logos?: { id?: number, data?: string }[],
-        public finished?: boolean
+        public finished?: boolean,
+        public started?: boolean
     ) { }
 }
 
@@ -27,14 +28,14 @@ export class ContestantInfo {
 export class LadderInfo {
     constructor(
         public lastNode: number,
-        public contestants: { id: number, name: string, node_id: number }[] //node_id min 0
+        public contestants: { id: number, name: string, node_id: number, defeated: boolean | null }[] //node_id min 0
     ) { }
 }
 
 export class ContestantDecision {
     constructor(
         public tournament_id: number,
-        public contestant_user_id: number,
+        public user_id: number,
         public winner: boolean
-    ) {}
+    ) { }
 }

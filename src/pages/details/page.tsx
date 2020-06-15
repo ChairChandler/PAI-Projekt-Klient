@@ -10,12 +10,14 @@ import LoginSubscriber from 'components/subscriber/login/login-subscriber'
 import * as pages from 'pages/pages'
 import TournamentService from 'services/tournament/tournament'
 import LoginService from 'services/user/login'
+import ContestantService from 'services/contestant/contestant'
 
 interface Props {
     location
 }
 
 interface State {
+    user_take_part?: boolean
     data?: TournamentInfo
     redirect?: { path: string, data?}
     tournamentID?: number
@@ -40,6 +42,7 @@ export default class DetailsPage extends React.Component<Props, State> {
             case pages.managePagePath:
 
                 this.state = {
+                    user_take_part: recvState.take_part,
                     data: recvState.data,
                     backPath: pages.managePagePath,
                     loginSubscriber:
@@ -80,6 +83,7 @@ export default class DetailsPage extends React.Component<Props, State> {
             case pages.ladderPagePath:
 
                 this.state = {
+                    user_take_part: recvState.user_take_part,
                     tournamentID: recvState.tournamentID,
                     backPath: DetailsPage.prevPagePath,
                     loginSubscriber: DetailsPage.prevPagePath === pages.managePagePath ?
@@ -120,6 +124,15 @@ export default class DetailsPage extends React.Component<Props, State> {
         this.setState(state)
     }
 
+    private checkIfContestant = async () => {
+        const { error, contestant } = await ContestantService.isContestant(this.state.tournamentID)
+        if (error) {
+            alert(error)
+        } else {
+            return contestant
+        }
+    }
+
     render = () => {
         if (this.state.redirect) {
             return <Redirect to={{
@@ -139,7 +152,7 @@ export default class DetailsPage extends React.Component<Props, State> {
                             onShowLadder={() => this.onRedirect(pages.ladderPagePath, {
                                 tournament_id: this.state.data.tournament_id,
                                 tournament_finished: this.state.data.finished,
-                                contestant_user_id: this.state.backPath === pages.managePagePath ? LoginService.getSelfID() : null
+                                contestant_user_id: this.state.user_take_part || this.checkIfContestant() ? LoginService.getSelfID() : null
                             })} />
                     </nav>
 

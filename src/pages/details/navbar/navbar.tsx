@@ -8,7 +8,6 @@ import { TournamentInfo } from 'models/tournament';
 import LoginSubscriber from 'components/subscriber/login/login-subscriber'
 import LoginService from 'services/user/login'
 import ContestantService from 'services/contestant/contestant'
-import { getOnlyDate } from 'utils/date'
 
 type VisibleDialog = 'login' | 'register' | 'forgotPassword' | 'join'
 type VisibleNavbar = 'unlogged' | 'logged'
@@ -82,9 +81,8 @@ export default class PageNavbar extends React.Component<Props, State> {
     }
 
     render = () => {
-        const { current_contestants_amount, participants_limit, datetime } = this.props.data
+        const { current_contestants_amount, participants_limit, started } = this.props.data
         const isMaxParticipants = current_contestants_amount === (participants_limit ?? Infinity)
-        const isAfterDatetime = getOnlyDate(new Date()).getTime() > getOnlyDate(new Date(datetime)).getTime()
 
         let navbar
         switch (this.state.visibleNavbar) {
@@ -95,7 +93,7 @@ export default class PageNavbar extends React.Component<Props, State> {
                         <button className='btn btn-primary' id="signIn" onClick={() => this.openDialog('login')}>Sign In</button>
                         <button className='btn btn-primary' id="signUp" onClick={() => this.openDialog('register')}>Sign Up</button>
                         {
-                            isAfterDatetime &&
+                            started &&
                             <button className='btn btn-primary' id="signUp" onClick={this.props.onShowLadder}>Show ladder</button>
                         }
                         {
@@ -111,7 +109,7 @@ export default class PageNavbar extends React.Component<Props, State> {
                         <button className='btn btn-primary' id="mainPage" onClick={this.props.onBack}>Back</button>
                         <button className='btn btn-primary' id="logout" onClick={this.onLogoutButtonClicked}>Logout</button>
                         {
-                            isAfterDatetime &&
+                            started &&
                             <button className='btn btn-primary' id="signUp" onClick={this.props.onShowLadder}>Show ladder</button>
                         }
                         {

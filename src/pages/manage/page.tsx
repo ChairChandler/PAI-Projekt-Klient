@@ -108,7 +108,7 @@ export default class ManagePage extends React.Component<{}, State> {
 
                     <MyTournamentsTable
                         data={this.state.tableShortData}
-                        onShow={(id: number) => this.onRedirectToPage(pages.detailsPagePath, { data: this.state.data[id] })}
+                        onShow={(id: number) => this.onRedirectToPage(pages.detailsPagePath, { data: this.state.data[id], take_part: this.state.tableShortData[id].take_part })}
                         onEdit={(id: number) => this.onRedirectToPage(pages.touchPagePath, { data: this.state.data[id] })}
                         onCreate={() => this.onRedirectToPage(pages.touchPagePath)}
                     />
